@@ -1,0 +1,37 @@
+PAGE GESTION NOTIFICATION:
+	tous
+PAGE DASHBOARD:
+	tous (done)
+
+PAGE CONFIDENTIALITY :
+	score de securite
+	2FA point a ameliorer
+	mode prive
+PAGE CONTRAT:
+	tous
+PAGE SUBSCRIPTION:
+	implementation de fonctionality
+	abonnement (free + paid)
+PAGE THEME :
+	tous
+PAGE EXPLORE :
+	barre de recherche
+PAGE CONVERSATIONS:
+	barre de recherche
+
+PAGE REGISTER:
+	mode passe
+	free lancer (send 2 photos of cards)
+	entreprise (send nif)
+	ADD CREATE PORTFOLIO PAGES
+PAGE HOME :
+	dynamic
+ADD ADMIN ACCESS
+
+CREATE SITE WEB:
+	tutorial video
+
+MAKE LOGO
+
+PAGE STATISTIC :
+	tous

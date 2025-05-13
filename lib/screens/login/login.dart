@@ -1,4 +1,5 @@
 // login.dart
+import 'package:ahmini/screens/login/resetpassword/forgotpassword.dart';
 import 'package:ahmini/screens/login/twoverificationscreen.dart';
 import 'package:ahmini/theme.dart';
 import 'package:get/get.dart';
@@ -97,7 +98,8 @@ class _LoginPageState extends State<LoginPage>
             );
             break;
           case 'error':
-            _passwordErrorNotifier.value = "Invalid Email or password";
+            _passwordErrorNotifier.value =
+                data['content']?['message'] ?? 'Invalid email or password'.tr;
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(
                 data['content']?['message'] ?? 'Invalid email or password'.tr,
@@ -109,7 +111,8 @@ class _LoginPageState extends State<LoginPage>
             myCustomDialog(context, {
               'type': 'Connection error'.tr,
               'message':
-              'Could not connect to server. Please check your connection'.tr,
+              'Could not connect to server. Please check your connection'
+                  .tr,
             });
             break;
         }
@@ -130,7 +133,8 @@ class _LoginPageState extends State<LoginPage>
     return Obx(() {
       final isDark = themeController.isDarkMode.value;
       final primaryColorTheme = isDark ? darkPrimaryColor : primaryColor;
-      final backgroundColorTheme = isDark ? darkBackgroundColor : backgroundColor;
+      final backgroundColorTheme =
+      isDark ? darkBackgroundColor : backgroundColor;
 
       return Scaffold(
         backgroundColor: primaryColorTheme,
@@ -143,7 +147,8 @@ class _LoginPageState extends State<LoginPage>
                   // En-tête avec logo et texte de bienvenue
                   _buildHeader(),
                   // Formulaire de connexion
-                  _buildForm(context, isDark, primaryColorTheme, backgroundColorTheme),
+                  _buildForm(
+                      context, isDark, primaryColorTheme, backgroundColorTheme),
                 ],
               ),
             ),
@@ -153,7 +158,8 @@ class _LoginPageState extends State<LoginPage>
     });
   }
 
-  Container _buildForm(BuildContext context, bool isDark, Color primaryColorTheme, Color backgroundColorTheme) {
+  Container _buildForm(BuildContext context, bool isDark,
+      Color primaryColorTheme, Color backgroundColorTheme) {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? darkSecondaryColor : Colors.white,
@@ -196,7 +202,8 @@ class _LoginPageState extends State<LoginPage>
                       _rememberMe = !_rememberMe;
                     },
                   ),
-                  Text('Se souvenir de moi'.tr,
+                  Text(
+                    'Se souvenir de moi'.tr,
                     style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.black87,
                     ),
@@ -205,7 +212,11 @@ class _LoginPageState extends State<LoginPage>
               ),
               TextButton(
                 onPressed: () {
-                  // Navigation vers la page de réinitialisation
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ForgotPasswordScreen()),
+                  );
                 },
                 child: Text(
                   'Mot de passe oublié?'.tr,
@@ -229,7 +240,7 @@ class _LoginPageState extends State<LoginPage>
                 borderRadius: BorderRadius.circular(30),
               ),
             ),
-            child:  Text(
+            child: Text(
               'Se connecter'.tr,
               style: TextStyle(
                   fontSize: 18,
@@ -243,12 +254,18 @@ class _LoginPageState extends State<LoginPage>
           // Séparateur
           Row(
             children: [
-              Expanded(child: Divider(color: isDark ? Colors.white30 : Colors.grey[300])),
+              Expanded(
+                  child: Divider(
+                      color: isDark ? Colors.white30 : Colors.grey[300])),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
-                child: Text('ou'.tr, style: TextStyle(color: isDark ? Colors.white70 : Colors.grey[600])),
+                child: Text('ou'.tr,
+                    style: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.grey[600])),
               ),
-              Expanded(child: Divider(color: isDark ? Colors.white30 : Colors.grey[300])),
+              Expanded(
+                  child: Divider(
+                      color: isDark ? Colors.white30 : Colors.grey[300])),
             ],
           ),
 
@@ -259,7 +276,8 @@ class _LoginPageState extends State<LoginPage>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('Vous n\'avez pas de compte?'.tr,
-                  style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
+                  style: TextStyle(
+                      color: isDark ? Colors.white70 : Colors.black87)),
               TextButton(
                 onPressed: () {
                   Navigator.push(
@@ -267,7 +285,7 @@ class _LoginPageState extends State<LoginPage>
                     MaterialPageRoute(builder: (context) => RegisterPage()),
                   );
                 },
-                child:  Text(
+                child: Text(
                   'S\'inscrire'.tr,
                   style: TextStyle(
                     color: primaryColorTheme,
@@ -287,8 +305,8 @@ class _LoginPageState extends State<LoginPage>
       padding: const EdgeInsets.symmetric(vertical: 30),
       child: Column(
         children: [
-          Image.asset('assets/icons/icon2.png'.tr, height: 120),
-          const SizedBox(height: 20),
+          Image.asset('assets/images/applogo.png'.tr, height: 170),
+          const SizedBox(height: 0),
           Text(
             'Bienvenue sur Ahmini'.tr,
             style: TextStyle(

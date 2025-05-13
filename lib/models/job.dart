@@ -53,25 +53,26 @@ class Product {
       csrfToken = temp['csrf_token'];
       csrfCookie = temp['csrf_cookie'];
     }
-    try{
-
-    final response = await http.put(
-      Uri.parse('$httpURL/api/entreprise/job/'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': "sessionid=$sessionCookie;csrftoken=$csrfCookie",
-        'X-CSRFToken': csrfToken!,
-      },
-      body: json.encode({
-        "status": status,
-        "job_id": jobRequestID,
-      }),
-    ).timeout(Duration(seconds: 15));
-    if (response.statusCode == 200) {
-      return true;
-    }
-    return false;
-    }catch(e){
+    try {
+      final response = await http
+          .put(
+            Uri.parse('$httpURL/api/entreprise/job/'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Cookie': "sessionid=$sessionCookie;csrftoken=$csrfCookie",
+              'X-CSRFToken': csrfToken!,
+            },
+            body: json.encode({
+              "status": status,
+              "job_id": jobRequestID,
+            }),
+          )
+          .timeout(Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        return true;
+      }
+      return false;
+    } catch (e) {
       return null;
     }
   }
@@ -105,5 +106,15 @@ class Product {
     return list
         .map((item) => Product.fromMap(item as Map<String, dynamic>))
         .toList();
+  }
+
+  Product copy() {
+    return Product(
+        id: id,
+        title: title,
+        description: description,
+        image: image,
+        technologies: technologies,
+        link: link);
   }
 }

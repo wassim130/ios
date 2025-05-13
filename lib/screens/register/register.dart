@@ -1,3 +1,4 @@
+import 'package:ahmini/screens/register/components/drop_down.dart';
 import 'package:ahmini/theme.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -6,6 +7,8 @@ import '../../controllers/theme_controller.dart';
 import '../../helper/CustomDialog/custom_dialog.dart';
 import '../../services/auth.dart';
 import 'package:flutter/material.dart';
+
+import 'components/passwordInput.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -35,14 +38,48 @@ class _RegisterPageState extends State<RegisterPage>
   bool _acceptConditions = false;
   bool _useLocation = false;
   bool _useFingerprint = false;
-  String _selectedDomaine = 'Technologie';
-  final List<String> _domaines = [
-    'Technologie'.tr,
-    'Design'.tr,
-    'Marketing'.tr,
-    'Finance'.tr,
-    'Autre'
-  ];
+  List<Map<String, dynamic>> _selectedDomaines = [];
+  double _passwordStrength = 0.0;
+  String _passwordStrengthText = 'Faible';
+  Color _strengthColor = Colors.red;
+
+  void _checkPasswordStrength(String password) {
+    if (password.length < 8) {
+    setState(() {
+      _passwordStrength = 0;
+      _passwordStrengthText = 'Très faible';
+      _strengthColor = Colors.red;
+    });
+    return;
+  }
+    double strength = 0;
+    if (password.length >= 8) strength += 0.2;
+    if (password.contains(RegExp(r'[A-Z]'))) strength += 0.2;
+    if (password.contains(RegExp(r'[a-z]'))) strength += 0.2;
+    if (password.contains(RegExp(r'[0-9]'))) strength += 0.2;
+    if (password.contains(
+        RegExp(r'''[!@#\$%^&*(),.?'":;/\\{}|<>`~\-_=+\§¤°€£¥©®™¶•¿¡]''')))
+      strength += 0.2;
+    setState(() {
+      _passwordStrength = strength;
+      if (strength <= 0.2 ) {
+        _passwordStrengthText = 'Très faible';
+        _strengthColor = Colors.red;
+      } else if (strength <= 0.4 ) {
+        _passwordStrengthText = 'Faible';
+        _strengthColor = Colors.orange;
+      } else if (strength <= 0.6 ) {
+        _passwordStrengthText = 'Moyen';
+        _strengthColor = Colors.yellow;
+      } else if (strength <= 0.8 ) {
+        _passwordStrengthText = 'Fort';
+        _strengthColor = Colors.lightGreen;
+      } else if (strength == 1 ) {
+        _passwordStrengthText = 'Très fort';
+        _strengthColor = Colors.green;
+      }
+    });
+  }
 
   // Clés pour la validation des formulaires
   final _formKey = GlobalKey<FormState>();
@@ -56,11 +93,11 @@ class _RegisterPageState extends State<RegisterPage>
     );
     _progressAnimation =
         Tween<double>(begin: 0, end: _getProgressValue(0)).animate(
-          CurvedAnimation(
-            parent: _progressController,
-            curve: Curves.easeInOut,
-          ),
-        );
+      CurvedAnimation(
+        parent: _progressController,
+        curve: Curves.easeInOut,
+      ),
+    );
     _progressController.forward();
   }
 
@@ -147,7 +184,7 @@ class _RegisterPageState extends State<RegisterPage>
     final bool acceptConditions = _acceptConditions;
     final bool useLocation = _useLocation;
     final bool useFingerprint = _useFingerprint;
-    final String domain = _selectedDomaine;
+    final List<Map<String, dynamic>> domain = _selectedDomaines;
     if (!acceptConditions) {
       HapticFeedback.mediumImpact();
 
@@ -165,6 +202,19 @@ class _RegisterPageState extends State<RegisterPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Les mots de passe ne correspondent pas.'.tr),
+          backgroundColor: Color.fromARGB(255, 255, 0, 0),
+        ),
+      );
+      return;
+    }
+    print(_passwordStrength);
+    if (_passwordStrength < 0.6 || password.length < 8) {
+      HapticFeedback.mediumImpact();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.'
+                  .tr),
           backgroundColor: Color.fromARGB(255, 255, 0, 0),
         ),
       );
@@ -188,29 +238,40 @@ class _RegisterPageState extends State<RegisterPage>
         );
       },
     );
-    final dynamic data = await AuthService.register(firstName, lastName, email,
-        phoneNumber, address, password, _isFreelancer!, useLocation, useFingerprint, domain);
+    final dynamic data = await AuthService.register(
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        address,
+        password,
+        _isFreelancer!,
+        useLocation,
+        useFingerprint,
+        domain);
     if (mounted) {
       Navigator.pop(context); // Close loading dialog
     }
 
     if (data?['status'] == 'success' && mounted) {
       // Check if user is a freelancer
-      if (data['isFreelancer'] == true) {
-        // Redirect to portfolio creation page
-        Navigator.pushReplacementNamed(
-            context,
-            '/portefolioedit',
-            arguments: {'isFirstLogin': true}
-        );
-      } else {
-        // Regular flow for non-freelancers
-        Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'user': data['user']}
-        );
-      }
+      // if (data['isFreelancer'] == true) {
+      //   // Redirect to portfolio creation page
+      //   Navigator.pushReplacementNamed(
+      //       context,
+      //       '/portefolioedit',
+      //       arguments: {'isFirstLogin': true}
+      //   );
+      // } else {
+      //   // Regular flow for non-freelancers
+      //   Navigator.pushReplacementNamed(
+      //       context,
+      //       '/entreprise/create',
+      //       arguments: {'isFirstLogin': true}
+      //   );
+      // }
+      Navigator.pushReplacementNamed(context, '/document-verification',
+          arguments: {'user': data['user']});
       return;
     } else if (data?['status'] == 'error' && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -223,13 +284,15 @@ class _RegisterPageState extends State<RegisterPage>
       Navigator.pop(context);
       myCustomDialog(context, {
         'type': 'Connection error'.tr,
-        'message': 'Could not connect to server. Please check your connection'.tr,
+        'message':
+            'Could not connect to server. Please check your connection'.tr,
       });
     }
     setState(() {});
   }
 
-  Widget _buildTypeSelection(Color primaryColorTheme, Color secondaryColorTheme) {
+  Widget _buildTypeSelection(
+      Color primaryColorTheme, Color secondaryColorTheme) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -294,9 +357,7 @@ class _RegisterPageState extends State<RegisterPage>
           color: isSelected ? Colors.white : Colors.white.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected
-                ? primaryColorTheme
-                : Colors.transparent,
+            color: isSelected ? primaryColorTheme : Colors.transparent,
             width: 2,
           ),
         ),
@@ -306,17 +367,13 @@ class _RegisterPageState extends State<RegisterPage>
             Icon(
               icon,
               size: 40,
-              color: isSelected
-                  ? primaryColorTheme
-                  : Colors.white,
+              color: isSelected ? primaryColorTheme : Colors.white,
             ),
             const SizedBox(height: 15),
             Text(
               title,
               style: TextStyle(
-                color: isSelected
-                    ? primaryColorTheme
-                    : Colors.white,
+                color: isSelected ? primaryColorTheme : Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -336,7 +393,8 @@ class _RegisterPageState extends State<RegisterPage>
     );
   }
 
-  Widget _buildPersonalInfo(Color primaryColorTheme, Color secondaryColorTheme) {
+  Widget _buildPersonalInfo(
+      Color primaryColorTheme, Color secondaryColorTheme) {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -420,49 +478,45 @@ class _RegisterPageState extends State<RegisterPage>
               primaryColorTheme: primaryColorTheme,
             ),
             const SizedBox(height: 20),
-            // Modification du style du DropdownButton pour correspondre au thème
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(
-                  color: primaryColorTheme,
-                  width: 1,
-                ),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedDomaine,
-                  isExpanded: true,
-                  hint:  Text(
-                    'Domaine d\'activité'.tr,
-                    style: TextStyle(
-                      color: primaryColorTheme,
+            TechnologiesSelectDropdown(
+              primaryColor: primaryColorTheme,
+              callBack: (value) {
+                //check if its already in the list
+                if (!_selectedDomaines
+                    .any((item) => item['id'] == value['id'])) {
+                  setState(() {
+                    _selectedDomaines.add(value);
+                  });
+                }
+              },
+            ),
+            Wrap(
+              children: _selectedDomaines.map((domaine) {
+                return GestureDetector(
+                  onTap: () =>
+                      setState(() => _selectedDomaines.remove(domaine)),
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          domaine['name']!,
+                          style: TextStyle(color: Colors.black54, fontSize: 12),
+                        ),
+                        SizedBox(width: 5),
+                        Icon(Icons.remove_circle,
+                            size: 20, color: primaryColorTheme),
+                      ],
                     ),
                   ),
-                  icon: const Icon(
-                    Icons.arrow_drop_down,
-                    color: Color.fromARGB(255, 0, 0, 0),
-                  ),
-                  dropdownColor: Colors.white,
-                  items: _domaines.map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        value,
-                        style: const TextStyle(
-                          color: Colors.black54,                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedDomaine = newValue!;
-                    });
-                  },
-                ),
-              ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 20),
             _buildSecurityOption(
@@ -490,6 +544,11 @@ class _RegisterPageState extends State<RegisterPage>
   }
 
   Widget _buildSecuritySettings(Color primaryColorTheme) {
+    // Ajout des variables manquantes
+    final isDark = themeController.isDarkMode.value;
+    final secondaryColorTheme = isDark ? darkSecondaryColor : secondaryColor;
+    final textColor = isDark ? Colors.white : Colors.black;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -504,34 +563,60 @@ class _RegisterPageState extends State<RegisterPage>
             ),
           ),
           const SizedBox(height: 30),
-          _buildTextField(
-            'Mot de passe'.tr,
-            _passwordController,
-            Icons.lock_outline,
+          InputField(
+            controller: _passwordController,
+            icon: Icons.lock_outline,
+            hint: 'Mot de passe'.tr,
             isPassword: true,
-            validator: (value) {
-              if (value?.isEmpty ?? true) {
-                return 'Veuillez entrer un mot de passe';
-              }
-              if (value!.length < 8) {
-                return 'Le mot de passe doit contenir au moins 8 caractères';
-              }
-              return null;
-            },
-            primaryColorTheme: primaryColorTheme,
+            obscureText: true,
+            onChanged: _checkPasswordStrength,
           ),
-          _buildTextField(
-            'Confirmer le mot de passe'.tr,
-            _confirmPasswordController,
-            Icons.lock_outline,
+          if (_passwordStrength > 0)
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Force du mot de passe:'.tr,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        _passwordStrengthText,
+                        style: TextStyle(
+                          color: _strengthColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: _passwordStrength,
+                      backgroundColor:
+                          isDark ? Colors.grey[700] : Colors.grey[200],
+                      valueColor: AlwaysStoppedAnimation<Color>(_strengthColor),
+                      minHeight: 8,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          InputField(
+            controller: _confirmPasswordController,
+            icon: Icons.lock_outline,
+            hint: 'Confirme le mode de passe'.tr,
             isPassword: true,
-            validator: (value) {
-              if (value != _passwordController.text) {
-                return 'Les mots de passe ne correspondent pas';
-              }
-              return null;
-            },
-            primaryColorTheme: primaryColorTheme,
+            obscureText: true,
+            onChanged: _checkPasswordStrength,
           ),
           const SizedBox(height: 20),
           Row(
@@ -553,13 +638,63 @@ class _RegisterPageState extends State<RegisterPage>
                       _acceptConditions = !_acceptConditions;
                     });
                   },
-                  child:  Text(
-                    'J\'accepte les conditions d\'utilisation et la politique de confidentialité'.tr,
+                  child: Text(
+                    'J\'accepte les conditions d\'utilisation et la politique de confidentialité'
+                        .tr,
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: secondaryColorTheme,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Le mot de passe doit contenir:'.tr,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: textColor,
+                  ),
+                ),
+                SizedBox(height: 10),
+                buildRequirement('Au moins 8 caractères'.tr),
+                buildRequirement('Au moins une lettre majuscule'.tr),
+                buildRequirement('Au moins une lettre minuscule'.tr),
+                buildRequirement('Au moins un chiffre'.tr),
+                buildRequirement('Au moins un caractère spécial'.tr),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildRequirement(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check_circle_outline,
+            size: 20,
+            color: Color(0xFF6F50FF),
+          ),
+          SizedBox(width: 10),
+          Text(
+            text,
+            style: TextStyle(
+              color: Colors.black,
+            ),
           ),
         ],
       ),
@@ -567,14 +702,16 @@ class _RegisterPageState extends State<RegisterPage>
   }
 
   Widget _buildTextField(
-      String hint,
-      TextEditingController controller,
-      IconData icon, {
-        TextInputType? keyboardType,
-        bool isPassword = false,
-        String? Function(String?)? validator,
-        required Color primaryColorTheme,
-      }) {
+    String hint,
+    TextEditingController controller,
+    IconData icon, {
+    TextInputType? keyboardType,
+    bool isPassword = false,
+    String? Function(String?)? validator,
+    void Function(String)? onChanged,
+    required Color primaryColorTheme,
+  }) {
+    bool obscureText = false;
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       decoration: BoxDecoration(
@@ -586,13 +723,29 @@ class _RegisterPageState extends State<RegisterPage>
         obscureText: isPassword,
         keyboardType: keyboardType,
         validator: validator,
+        onChanged: onChanged,
         decoration: InputDecoration(
           hintText: hint,
           prefixIcon: Icon(icon, color: primaryColorTheme),
           border: InputBorder.none,
           contentPadding:
-          const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           errorStyle: const TextStyle(color: Colors.white),
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: primaryColor,
+                  ),
+                  onPressed: !isPassword
+                      ? null
+                      : () {
+                          setState(() {
+                            obscureText = !obscureText;
+                          });
+                        },
+                )
+              : null,
         ),
       ),
     );
@@ -656,7 +809,8 @@ class _RegisterPageState extends State<RegisterPage>
       final isDark = themeController.isDarkMode.value;
       final primaryColorTheme = isDark ? darkPrimaryColor : primaryColor;
       final secondaryColorTheme = isDark ? darkSecondaryColor : secondaryColor;
-      final backgroundColorTheme = isDark ? darkBackgroundColor : backgroundColor;
+      final backgroundColorTheme =
+          isDark ? darkBackgroundColor : backgroundColor;
 
       return Scaffold(
         backgroundColor: primaryColorTheme,
@@ -695,7 +849,7 @@ class _RegisterPageState extends State<RegisterPage>
                   if (_currentStep > 0)
                     TextButton(
                       onPressed: _previousStep,
-                      child:  Text(
+                      child: Text(
                         'Précédent'.tr,
                         style: TextStyle(
                           color: Colors.white,
@@ -730,4 +884,3 @@ class _RegisterPageState extends State<RegisterPage>
     });
   }
 }
-

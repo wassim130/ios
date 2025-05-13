@@ -93,7 +93,7 @@ class AuthService {
       bool isFreelancer,
       bool useLocation,
       bool useFingerprint,
-      String domain,
+      List<Map<String,dynamic>> domain,
       ) async {
     try {
       final String deviceName = await getDeviceName();
@@ -112,7 +112,7 @@ class AuthService {
           'is_entreprise': !isFreelancer,
           'use_location': useLocation,
           'use_fingerprint': useFingerprint,
-          'domain': domain,
+          'domain': domain.map((d) => d['id']).toList(),
           'connection_type': connectionType,
           'device_name': deviceName,
           'device_language':
@@ -226,6 +226,41 @@ class AuthService {
         'status': 'error',
         'type': 'error',
         'message': 'Connection error',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> resendTwoFactor(String twoFactorId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$httpURL/$authAPI/resend-two-factor/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': (await getCsrf())['csrf_token'],
+        },
+        body: jsonEncode({
+          'two_factor_id': twoFactorId,
+        }),
+      ).timeout(Duration(seconds: timeout));
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'status': 'success',
+          'message': responseData['message'],
+        };
+      } else {
+        return {
+          'status': 'error',
+          'message': responseData['content']?['message'] ?? 'Une erreur s\'est produite',
+        };
+      }
+    } catch (e) {
+      print('Error resending 2FA code: $e');
+      return {
+        'status': 'error',
+        'message': 'Une erreur s\'est produite lors de la connexion au serveur',
       };
     }
   }
@@ -501,4 +536,3 @@ class AuthService {
     }
   }
 }
-

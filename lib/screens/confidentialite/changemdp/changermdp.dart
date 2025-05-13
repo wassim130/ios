@@ -30,12 +30,12 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
 
   void _checkPasswordStrength(String password) {
     double strength = 0;
-
     if (password.length >= 8) strength += 0.2;
-    if (password.contains(RegExp(r'[A-Z]'.tr))) strength += 0.2;
-    if (password.contains(RegExp(r'[a-z]'.tr))) strength += 0.2;
-    if (password.contains(RegExp(r'[0-9]'.tr))) strength += 0.2;
-    if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'.tr))) strength += 0.2;
+    if (password.contains(RegExp(r'[A-Z]'))) strength += 0.2;
+    if (password.contains(RegExp(r'[a-z]'))) strength += 0.2;
+    if (password.contains(RegExp(r'[0-9]'))) strength += 0.2;
+    if (password.contains(RegExp(r'''[!@#\$%^&*(),.?'":;/\\{}|<>`~\-_=+\§¤°€£¥©®™¶•¿¡]'''))) strength += 0.2;
+
 
     setState(() {
       _passwordStrength = strength;
@@ -245,7 +245,8 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                         "Entrez votre nouveau mot de passe",
                         _obscureNewPassword,
                             (val) => setState(
-                                () => _obscureNewPassword = !_obscureNewPassword),
+                                () => _obscureNewPassword = !_obscureNewPassword
+                                ),
                         controller: _newPasswordController,
                         onChanged: (val) {
                           _checkPasswordStrength(val);
@@ -266,7 +267,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                           if (!value.contains(RegExp(r'[0-9]'.tr))) {
                             return 'Le mot de passe doit contenir au moins un chiffre';
                           }
-                          if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'.tr))) {
+                          if (!value.contains(RegExp(r'''[!@#\$%^&*(),.?'":;/\\{}|<>`~\-_=+\§¤°€£¥©®™¶•¿¡]'''))) {
                             return 'Le mot de passe doit contenir au moins un caractère spécial';
                           }
                           return null;

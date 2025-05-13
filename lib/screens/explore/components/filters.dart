@@ -84,6 +84,7 @@ class _FilterState extends State<Filter> {
                   if (!widget.isEnterprise) {
                     widget.listKey.currentState
                         ?.fetchCompanies(filter: filter.id);
+                    widget.listKey.currentState?.currentFilter = filter.id;
                   } else {
                     widget.listKey.currentState
                         ?.fetchFreeLancers(filter: filter.id);

@@ -13,26 +13,32 @@ final Color darkBackgroundColor = Color(0xFF1E272E);
 // Thème clair
 final ThemeData myTheme = ThemeData(
   brightness: Brightness.light,
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: const Color.fromARGB(255, 183, 77, 58),
+  colorScheme: ColorScheme.light(
     brightness: Brightness.light,
+    surface: backgroundColor,
+    primary: primaryColor,
+    secondary: secondaryColor, 
+    
   ),
   useMaterial3: true,
   primarySwatch: Colors.deepPurple,
   fontFamily: 'Poppins',
   canvasColor: backgroundColor,
   textTheme: TextTheme(
-    headlineLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-    bodyLarge: TextStyle(fontSize: 16),
+    headlineLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,color:Colors.black),
+    bodyLarge: TextStyle(fontSize: 16,color:Colors.black),
   ),
+  primaryColor: primaryColor,
 );
 
 // Thème sombre
 final ThemeData myDarkTheme = ThemeData(
   brightness: Brightness.dark,
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: const Color.fromARGB(255, 183, 77, 58),
+  colorScheme: ColorScheme.dark(
     brightness: Brightness.dark,
+    surface: darkBackgroundColor,
+    primary: darkPrimaryColor,
+    secondary: darkSecondaryColor,
   ),
   useMaterial3: true,
   primarySwatch: Colors.deepPurple,
@@ -49,4 +55,6 @@ final ThemeData myDarkTheme = ThemeData(
       color: Colors.white,
     ),
   ),
+  primaryColor: darkPrimaryColor,
+
 );

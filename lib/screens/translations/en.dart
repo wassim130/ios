@@ -61,6 +61,42 @@ final Map<String, String> en = {
   'profil_mis_a_jour': 'Profile Updated',
   'changer_photo': 'Change Photo',
   'telecharger_photo': 'Upload Photo',
+  'Modifier les coordonnées de votre entreprise': 'Edit Company Coordinates',
+  'Modifier votre compte public et portefolio': 'Edit Public Account and Portfolio',
+  'Personnalisez votre profil'  : 'Personalize Your Profile',
+  'Profil complété à 80%': 'Profile Completed at 80%',
+  'Modifier votre profil' : 'Edit Your Profile',
+
+  // Compte
+  'Créez votre entreprise':'Create Your Business',
+  'Bienvenue sur votre entreprise': 'Welcome to your business',
+  'Créez votre entreprise professionnel pour vous démarquer auprès des clients potentiels.': 'Create your professional business to stand out to potential clients.',
+  'Informations personnelles': 'Personal Information',
+  'Ajoutez vos informations de base pour que les clients puissent vous connaître.': 'Add your basic information so clients can get to know you.',
+  'Expérience professionnelle': 'Professional Experience',
+  'Partagez votre parcours et vos compétences pour attirer les bons projets.': 'Share your background and skills to attract the right projects.',
+  'Coordonnées': 'Contact Information',
+  'Ajoutez vos coordonnées pour que les clients puissent vous contacter facilement.': 'Add your contact details so clients can reach you easily.',
+  'Projets': 'Projects',
+  'Ajoutez vos projets pour montrer votre expertise et votre expérience.': 'Add your projects to showcase your expertise and experience.',
+  'Votre portfolio est votre vitrine professionnelle. Commencez par ajouter une photo professionnelle et votre nom complet pour vous présenter aux clients potentiels.': 'Your portfolio is your professional showcase. Start by adding a professional photo and your full name to introduce yourself to potential clients.',
+  'Votre résumé personnel est souvent la première chose que les clients lisent. Soyez concis et mettez en avant vos points forts.': 'Your personal summary is often the first thing clients read. Be concise and highlight your strengths.',
+  'Détaillez votre expérience professionnelle en mettant l\'accent sur les compétences pertinentes pour les projets que vous souhaitez obtenir. Un CV bien structuré augmente vos chances d\'être sélectionné.': 'Detail your professional experience by focusing on relevant skills for the projects you want. A well-structured resume increases your chances of being selected.',
+  'Assurez-vous que vos coordonnées sont à jour pour que les clients puissent vous contacter facilement. L\'email de contact sera visible publiquement, alors utilisez une adresse professionnelle.': 'Make sure your contact information is up to date so clients can easily reach you. The contact email will be publicly visible, so use a professional address.',
+  'Ajoutez vos meilleurs projets pour montrer votre expertise. Incluez une description claire et les technologies utilisées. Des images de qualité augmenteront l\'attractivité de votre portfolio.': 'Add your best projects to showcase your expertise. Include a clear description and the technologies used. High-quality images will make your portfolio more attractive.',
+  'Conseils': 'Tips',
+  'À propos de vous': 'About you',
+  'Expérience professionnelle': 'Professional Experience',
+  'Télécharger votre CV': 'Upload your resume',
+  'Formats acceptés: PDF, DOC, DOCX': 'Accepted formats: PDF, DOC, DOCX',
+  'Coordonnées': 'Contact Information',
+  'Ajouter': 'Add',
+  'Projets': 'Projects',
+  'Aucun projet pour le moment': 'No projects at the moment',
+  'Ajoutez vos projets pour montrer votre expertise': 'Add your projects to showcase your expertise',
+
+
+
 
   // Messages
   'nouveau_message': 'New Message',
@@ -82,6 +118,10 @@ final Map<String, String> en = {
   'toutes_notifications': 'All Notifications',
   'aucune_notification': 'No Notifications',
   'marquer_tout_lu': 'Mark All as Read',
+  'Gérez les notifications': 'Manage Notifications',
+  "Contrat": 'Contract',
+  'Tous les messages': 'All Messages',
+  'Choisissez quelles notifications vous souhaitez recevoir..': 'Choose which notifications you would like to receive',
 
   // Security and Privacy
   'securite_confidentialite': 'Security & Privacy',
@@ -97,6 +137,34 @@ final Map<String, String> en = {
   'tout_le_monde': 'Everyone',
   'amis_seulement': 'Friends Only',
   'personne': 'No One',
+  'Points à améliorer': 'Points to Improve',
+  'Actions de sécurité': 'Security Actions',
+  'Paramètres de confidentialité' : 'Privacy Settings',
+  'Mode privé': 'Private Mode',
+  'Notifications de sécurité': 'Security Notifications',
+  'Recevoir une alerte lors d\'une nouvelle connexion': 'Receive an alert when a new connection is made',
+  'Masquer votre statut en ligne': 'Hide your online status',
+  'Conseil de sécurité': 'Security Tips',
+  'Utilisez un gestionnaire de mots de passe pour créer et stocker des mots de passe forts et uniques pour chacun de vos comptes.': 'Use a password manager to create and store strong, unique passwords for each of your accounts.',
+'Changer le mot de passe': 'Change password',
+'Authentification à deux facteurs': 'Two-Factor Authentication',
+'Authentification à deux facteurs désactivée': 'Two-Factor Authentication disabled',
+'Activée': 'Enabled',
+'Non activée': 'Disabled',
+'Vérification des appareils connectés': 'Connected devices check',
+'Historique des connexions': 'Login history',
+'Paramètres de confidentialité': 'Privacy settings',
+'Notifications de connexion': 'Login notifications',
+'Recevoir une alerte lors d\'une nouvelle connexion': 'Receive an alert on new login',
+'mise a jour de mode prive avec success': 'Private mode updated successfully',
+"Erreur dans la modification de status": "Error updating status",
+'Sécurité & Confidentialité': 'Security & Privacy',
+"Pas de risque": "No risk",
+'Moyen': 'Medium',
+"Élevé": "High",
+'Changer': 'Change',
+
+
 
   // Subscription
   'abonnement': 'Subscription',
@@ -111,6 +179,13 @@ final Map<String, String> en = {
   'methode_paiement': 'Payment Method',
   'details_abonnement': 'Subscription Details',
   'expire_le': 'Expires On',
+  'Aucun abonnement': 'No Subscription',
+  'Gérez vos abonnements': 'Manage your subscriptions',
+  "Choisissez votre plan d'abonnement mensuel pour accéder à toutes les fonctionnalités.": "Choose your monthly subscription plan to access all features.",
+"Forfaits disponibles": "Available plans",
+"Finalisation de votre abonnement...": "Finalizing your subscription...",
+"Erreur: ID de paiement manquant": "Error: Missing payment ID",
+
 
   // FAQ and Help
   'faq': 'FAQ',
@@ -120,6 +195,7 @@ final Map<String, String> en = {
   'questions_frequentes': 'Frequently Asked Questions',
   'comment_utiliser': 'How to Use',
   'depannage': 'Troubleshooting',
+  'Assistance': 'Assistance',
 
   // Language
   'langue': 'Language',
@@ -159,6 +235,7 @@ final Map<String, String> en = {
   'termine': 'Completed',
   'annule': 'Canceled',
   'en_attente': 'Pending',
+  'Tous les contrats': 'All Contracts',
 
   // Business
   'entreprise': 'Company',
@@ -178,6 +255,17 @@ final Map<String, String> en = {
   'utilisateurs': 'Users',
   'projets': 'Projects',
   'taches': 'Tasks',
+  'Votre Portfeuille Professionnel':'Your Professional Portfolio',
+  'Modifier Portefeuille': 'Edit Portfolio',
+  'Gérez vos offres d\'emploi et les condidatures reçues': 'Manage your job offers and received applications',
+  'offres': 'Offers',
+  'Candidats': 'Candidates',
+  'Pending' : 'Pending',
+  'Offres d\'emploi': 'Job Offers',
+  'Votre Portefeuille Professionnel': 'Your Professional Portfolio',
+  'Gérez vos offres d\'emploi et les condidatures reçues': 'Manage your job offers and received applications',
+  'Besoin d\'aide avec votre portefeuille? Contactez notre support technique au 0549819905': 'Need help with your portfolio? Contact our technical support at 0549819905',
+  
 
   // Statistics
   'statistiques': 'Statistics',
@@ -191,6 +279,11 @@ final Map<String, String> en = {
   'moyenne': 'Average',
   'graphique': 'Chart',
   'donnees': 'Data',
+  'Vue d\'ensemble':'Overview',
+  'Statistiques de votre compte':'Your Account Statistics',
+  'Score de Sécurité': 'Security Score',
+  'Activités Récentes': 'Recent Activities',
+  'Distribution des Contrats': 'Contract Distribution',
 
   // Time and Date
   'aujourd_hui': 'Today',
@@ -213,7 +306,20 @@ final Map<String, String> en = {
   'erreur_connexion': 'Connection error',
   'non_trouve': 'Not found',
 
+  // Theme
+  'Thème': 'Theme',
+  'clair': 'Light',
+  'sombre': 'Dark',
+  'Mode sombre': 'Dark Mode',
+  'Mode clair': 'Light Mode',
+  'Aperçu': 'Preview',
+  'Sélectionnez votre thème préféré': 'Select your preferred theme',
+  'Exemple de texte de sous-titre': 'Example subtitle text',
+  'Basculer entre le mode clair et sombre': 'Toggle between light and dark mode',
+
+
   // Miscellaneous
+  'Accepter'  : 'Accept',
   'bienvenue': 'Welcome',
   'bon_retour': 'Welcome back',
   'commencer': 'Start now',
@@ -232,6 +338,8 @@ final Map<String, String> en = {
   'Aide': 'Help',
   'Fermer': 'Close',
   'Compte': 'Account',
+  'Explorer': 'Explore',
+  'Accueil': 'Home',
   'Modifier le profil': 'Edit profile',
   'Notifications': 'Notifications',
   'Confidentialité': 'Privacy',
@@ -321,23 +429,26 @@ final Map<String, String> en = {
     ' 4.8 (156 avis)': ' 4.8 (156 reviews)',
     'Node.js': 'Node.js',
     'Voir plus': 'See more',
-'Aide': 'Help',
-'Besoin d\'aide ? Contactez notre support technique au 0540274628': 'Need help? Contact our technical support at 0540274628',
-'Fermer': 'Close',
-'Nous sommes là pour vous aider avec tout sur l\'application Ahmini': 'We are here to help you with everything about the Ahmini app',
-'Consultez nos questions fréquemment posées ou envoyez-nous un email..': 'Check out our frequently asked questions or send us an email..',
-'FAQ': 'FAQ',
-'Qu\'est-ce que Ahmini ?': 'What is Ahmini?',
-'Ahmini est une application qui permet aux freelances de trouver des entreprises pour offrir leurs services, et permet aux entreprises de trouver des freelances capables de répondre à leurs besoins, tout en sécurisant les transactions grâce à un contrat signé par les deux parties.': 'Ahmini is an app that allows freelancers to find companies to offer their services, and allows companies to find freelancers capable of meeting their needs, while securing transactions through a contract signed by both parties.',
-'Comment procéder au paiement ?': 'How to proceed with payment?',
-'Comment être sûr que l\'entreprise me paiera ?': 'How can I be sure that the company will pay me?',
-'Grâce à un contrat signé par l\'entreprise et le freelance.': 'Through a contract signed by the company and the freelancer.',
-'Comment être sûr que le freelance accomplira le travail demandé ?': 'How can I be sure that the freelancer will complete the requested work?',
-'Grâce à un contrat signé par l\'entreprise et le freelance.': 'Through a contract signed by the company and the freelancer.',
-'Comment puis-je demander au freelance le prix du service ?': 'How can I ask the freelancer for the price of the service?',
-'En expliquant le travail demandé à ce freelance via le chat, et il pourra proposer un prix.': 'By explaining the requested work to this freelancer via chat, and they can propose a price.',
-'Toujours bloqué ? Nous sommes à un mail près': 'Still stuck? We are just one email away',
-'Envoyer un message': 'Send a message',
+  'Aide': 'Help',
+  'Besoin d\'aide ? Contactez notre support technique au 0540274628': 'Need help? Contact our technical support at 0540274628',
+  'Fermer': 'Close',
+  'Nous sommes là pour vous aider avec tout sur l\'application Ahmini': 'We are here to help you with everything about the Ahmini app',
+  'Consultez nos questions fréquemment posées ou envoyez-nous un email..': 'Check out our frequently asked questions or send us an email..',
+  'FAQ': 'FAQ',
+  'Qu\'est-ce que Ahmini ?': 'What is Ahmini?',
+  'Ahmini est une application qui permet aux freelances de trouver des entreprises pour offrir leurs services, et permet aux entreprises de trouver des freelances capables de répondre à leurs besoins, tout en sécurisant les transactions grâce à un contrat signé par les deux parties.': 'Ahmini is an app that allows freelancers to find companies to offer their services, and allows companies to find freelancers capable of meeting their needs, while securing transactions through a contract signed by both parties.',
+  'Comment procéder au paiement ?': 'How to proceed with payment?',
+  'Comment être sûr que l\'entreprise me paiera ?': 'How can I be sure that the company will pay me?',
+  'Grâce à un contrat signé par l\'entreprise et le freelancer.': 'Through a contract signed by the company and the freelancer.',
+  'Comment être sûr que le freelancer accomplira le travail demandé ?': 'How can I be sure that the freelancer will complete the requested work?',
+  'Grâce à un contrat signé par l\'entreprise et le freelancer.': 'Through a contract signed by the company and the freelancer.',
+  "Via compte - abonnements, choisir l'abonnement qui vous convient et procédez au paiement en toute sécurité." :  "Via account - subscriptions, choose the subscription that suits you and proceed with secure payment",
+  "Ahmini est une application qui permet aux freelances de trouver des entreprises pour offrir leurs services, et permet aux entreprises de trouver des freelances capables de répondre à leurs besoins, tout en sécurisant les transactions grâce à un contrat signé par les deux parties.": 'Ahmini is an app that allows freelancers to find companies to offer their services, and allows companies to find freelancers capable of meeting their needs, while securing transactions through a contract signed by both parties.',
+
+  'Comment puis-je demander au freelancer le prix du service ?': 'How can I ask the freelancer for the price of the service?',
+  'En expliquant le travail demandé à ce freelancer via le chat, et il pourra proposer un prix.': 'By explaining the requested work to this freelancer via chat, and they can propose a price.',
+  'Toujours bloqué ? Nous sommes à un mail près': 'Still stuck? We are just one email away',
+  'Envoyer un message': 'Send a message',
 
 };
 

@@ -273,10 +273,10 @@ class _SecurityPrivacyScreenState extends State<SecurityPrivacyScreen> {
                           'Dernier changement il y a ${(widget.user.lastPasswordChange / 60 / 24).toInt()} jour'
                               .tr,
                       severity: widget.user.lastPasswordChange < 60 * 24
-                          ? "Pas de risque"
+                          ? "Pas de risque".tr
                           : widget.user.lastPasswordChange < 60 * 24 * 30
-                              ? 'Moyen'
-                              : "Élevé",
+                              ? 'Moyen'.tr
+                              : "Élevé".tr,
                       severityColor: widget.user.lastPasswordChange < 60 * 24
                           ? Colors.green
                           : widget.user.lastPasswordChange < 60 * 24 * 30
@@ -312,7 +312,7 @@ class _SecurityPrivacyScreenState extends State<SecurityPrivacyScreen> {
                       icon: Icons.password,
                       title: 'Changer le mot de passe'.tr,
                       subtitle:
-                          "Dernier modification il y a ${(widget.user.lastPasswordChange / 60 / 24).toInt()} jour",
+                          "Dernier modification il y a ${(widget.user.lastPasswordChange / 60 / 24).toInt()} jour".tr,
                       onTap: () {
                         Navigator.pushNamed(
                             context, "/confidentialite/changemdp");
@@ -396,7 +396,7 @@ class _SecurityPrivacyScreenState extends State<SecurityPrivacyScreen> {
                         'Masquer votre statut en ligne'.tr,
                         privateMode,
                         (value) async {
-                          final s = await UserService.updateProfile(
+                          final s = await UserService.updateProfilePrivateMode(
                               {'private_mode': value});
                           if (s['status'] == 'success') {
                             privateMode = value;
@@ -461,7 +461,7 @@ class _SecurityPrivacyScreenState extends State<SecurityPrivacyScreen> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Utilisez un gestionnaire de mots de passe pour créer et stocker des mots de passe forts et uniques pour chacun de vos comptes.'
+                        'Utilisez un gestionnaire de mots de passe pour créer et stocker des mots de passe forts et uniques pour chacun de vos comptes.'.tr
                             .tr,
                         style: TextStyle(
                           color: textColor,

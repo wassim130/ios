@@ -4,6 +4,8 @@ class UserModel {
   final bool isEnterprise;
   bool twoFactorEnabled;
   final int lastPasswordChange;
+  final bool isSuperUser;
+  final bool isNew;
 
   UserModel({
     required this.username,
@@ -16,6 +18,8 @@ class UserModel {
     required this.lastPasswordChange,
     this.profilePicture,
     this.twoFactorEnabled = false,
+    this.isSuperUser = false,
+    this.isNew = false
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) => UserModel(
@@ -29,6 +33,8 @@ class UserModel {
     lastPasswordChange: map['last_changed_password'],
     profilePicture: map['profile_picture'] as String?,
     twoFactorEnabled: map['twoFactorEnabled'] ?? false,
+    isSuperUser: map['super_user'] ?? false,
+    isNew:map['is_new_user'] ?? false,
   );
 
   Map<String, dynamic> toMap() => {
@@ -42,6 +48,8 @@ class UserModel {
     'profile_picture': profilePicture,
     'last_changed_password': lastPasswordChange,
     'twoFactorEnabled': twoFactorEnabled,
+    'super_user': isSuperUser,
+    'is_new_user': isNew,
   };
 
   @override

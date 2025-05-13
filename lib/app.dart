@@ -1,3 +1,4 @@
+import 'package:ahmini/screens/entreprise/job_detail.dart';
 import 'package:ahmini/screens/freelancer_portfolio/creationportefolio.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -11,6 +12,7 @@ import 'screens/confidentialite/changemdp/changermdp.dart';
 import 'screens/confidentialite/confidentialite.dart';
 import 'screens/confidentialite/connected_devices/connected_devices.dart';
 import 'screens/confidentialite/login_history/login_history.dart';
+import 'screens/entreprise/create_entreprise.dart';
 import 'screens/entreprise/entreprise.dart';
 import 'screens/faq/faq.dart';
 import 'screens/language/language.dart';
@@ -21,6 +23,7 @@ import 'screens/profile/edit_profile/edit_profile.dart';
 import 'screens/messages/chats/chats.dart';
 import 'screens/messages/chat_page/chat_page.dart';
 import 'screens/notifactions/notification_details.dart';
+import 'screens/register/documentverificationpage.dart';
 import 'screens/statistic/main_screen.dart';
 import 'screens/statistic/constants.dart';
 import 'screens/subscription/home.dart';
@@ -74,7 +77,9 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       theme: myTheme,
       darkTheme: myDarkTheme,
-      themeMode: themeController.isDarkMode.value ? ThemeMode.dark : ThemeMode.light,
+      themeMode: themeController.isDarkMode.value
+          ? ThemeMode.dark
+          : ThemeMode.light,
       translations: Messages(),
       locale: Get.deviceLocale, // Will be overridden in initServices
       fallbackLocale: const Locale('fr', 'FR'),
@@ -130,7 +135,7 @@ class _MyAppState extends State<MyApp> {
       '/profile/edit': ((args) => ProfileEditScreen(), 'push'),
       '/profile/statistics': ((args) => StatisticsPage(), 'push'),
       '/profile/subscriptions/': ((args) => SubscriptionScreen(), 'push'),
-      '/contract/': ((args) => ContractPage(), 'push'),
+      '/contract/': ((args) => ContractsPage(), 'push'),
       '/confidentialite': ((args) => SecurityPrivacyScreen(), 'push'),
       '/confidentialite/changemdp': ((args) => PasswordChangeScreen(), 'push'),
       '/confidentialite/connected_devices': (
@@ -149,7 +154,7 @@ class _MyAppState extends State<MyApp> {
       ),
       '/freelancer_portfolio': (
           (args) {
-        int? id = args?['id'];
+        int? id = args?['portfolioID'];
         return MPortfolioPage(id: id);
       },
       'push'
@@ -157,20 +162,44 @@ class _MyAppState extends State<MyApp> {
       '/entreprise/home': (
           (args) {
         if (args == null || !args.containsKey('companyID')) {
-          return null;
+          return EnterprisePage();
         }
         return EnterprisePage(companyID: args['companyID']);
       },
       'push'
       ),
-
+      '/entreprise/create': (
+          (args) {
+        bool isFirstLogin = args?['isFirstLogin'] ?? false;
+        return EntrepriseCreatePage(isFirstLogin: isFirstLogin);
+      },
+      'push'
+      ),
       '/login': ((args) => LoginPage(), 'push'),
       '/inscription': ((args) => RegisterPage(), 'push'),
       // '/portefolioedit': ((args) => MPortfolioPage(), 'push'),
       '/confidentialite/login_history': ((args) => LoginHistoryPage(), 'push'),
       '/dashboard': ((args) => DashboardPage(), 'push'),
       '/theme': ((args) => ThemeSettingsPage(), 'push'),
-
+      '/document-verification': (
+          (args) {
+        if (args == null || !args.containsKey('user')) return null;
+        return DocumentVerificationPage(user: args['user']);
+      },
+      'push'
+      ),
+      '/job-detail': (
+          (args) {
+        if (args == null || !args.containsKey('job') || !args.containsKey('companyID')) {
+          return null;
+        }
+        return JobDetailPage(
+          job: args['job'],
+          companyID: args['companyID'],
+        );
+      },
+      'push'
+      ),
     };
 
     return (RouteSettings settings) {
@@ -238,4 +267,3 @@ class _MyAppState extends State<MyApp> {
     }
   }
 }
-

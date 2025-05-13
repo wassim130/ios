@@ -131,22 +131,22 @@ class FaqAndHelpScreen extends StatelessWidget {
                             ),
                             faqTile(
                               "Comment procéder au paiement ?".tr,
-                              "blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabllllllllllllllllllllllllllllllllllllaaaaaaaaaaaaaaaaaaaaaaaaaaa.".tr,
+                              "Via compte - abonnements, choisir l'abonnement qui vous convient et procédez au paiement en toute sécurité.".tr,
                               isDark,
                             ),
                             faqTile(
                               "Comment être sûr que l'entreprise me paiera ?".tr,
-                              "Grâce à un contrat signé par l'entreprise et le freelance.".tr,
+                              "Grâce à un contrat signé par l'entreprise et le freelancer.".tr,
                               isDark,
                             ),
                             faqTile(
-                              "Comment être sûr que le freelance accomplira le travail demandé ?".tr,
-                              "Grâce à un contrat signé par l'entreprise et le freelance.".tr,
+                              "Comment être sûr que le freelancer accomplira le travail demandé ?".tr,
+                              "Grâce à un contrat signé par l'entreprise et le freelancer.".tr,
                               isDark,
                             ),
                             faqTile(
-                              "Comment puis-je demander au freelance le prix du service ?".tr,
-                              "En expliquant le travail demandé à ce freelance via le chat, et il pourra proposer un prix.".tr,
+                              "Comment puis-je demander au freelancer le prix du service ?".tr,
+                              "En expliquant le travail demandé à ce freelancer via le chat, et il pourra proposer un prix.".tr,
                               isDark,
                             )
                           ],

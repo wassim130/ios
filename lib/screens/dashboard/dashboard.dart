@@ -422,7 +422,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ) : null,
       ),
       onTap: () {
-        Navigator.pushNamed(context, '/portefolio'.tr,
+        Navigator.pushNamed(context, '/freelancer_portfolio'.tr,
             arguments: {"portfolioID": applicant['portfolio_id']});
       },
     );

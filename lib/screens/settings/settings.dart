@@ -1,3 +1,4 @@
+import 'package:ahmini/helper/CustomDialog/loading_indicator.dart';
 import 'package:ahmini/services/constants.dart';
 import 'package:ahmini/theme.dart';
 import 'package:flutter/material.dart';
@@ -5,10 +6,9 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
-import '../../controllers/app_controller.dart';
 import '../../controllers/theme_controller.dart';
-import '../../screens/mainScreen/main_screen.dart';
 import '../notifactions/notification_settings.dart';
 
 import '../../helper/CustomDialog/custom_dialog.dart';
@@ -19,24 +19,109 @@ import '../../models/user.dart';
 
 import '../../screens/theme/theme.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   final bool? isLoggedIn;
-  final GlobalKey<MainScreenState>? parentKey;
-  late final UserModel? user;
-  final ThemeController themeController = Get.find<ThemeController>();
-
-  bool _isLoading = false;
-  final String apiBaseUrl = '$httpURL/api';
-
-  SettingsPage({
+  final UserModel? user;
+  const SettingsPage({
     super.key,
     this.isLoggedIn,
-    this.parentKey,
-  }) {
-    user = Get.find<AppController>().user;
+    this.user,
+  });
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  final ThemeController themeController = Get.find<ThemeController>();
+  final String apiBaseUrl = '$httpURL/api';
+
+  bool _isLoading = false;
+  bool hasSubscription = false;
+  String? currentPlan;
+  DateTime? startDate;
+  DateTime? endDate;
+  bool isSubscriptionActive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserSubscription();
   }
 
-  // Fonction pour vérifier si l'utilisateur a un portfolio
+  Future<void> fetchUserSubscription() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionCookie = prefs.getString('session_cookie');
+
+      if (sessionCookie == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse('$apiBaseUrl/payment/user-subscriptions/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': "sessionid=$sessionCookie",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        setState(() {
+          hasSubscription = data['has_subscription'] ?? false;
+          currentPlan = "";
+          isSubscriptionActive = false;
+
+          if (data['subscription'] != null) {
+            currentPlan = data['subscription']['plan_type'] ?? "";
+            isSubscriptionActive = data['subscription']['is_active'] ?? false;
+
+            if (data['subscription']['start_date'] != null) {
+              startDate = DateTime.parse(data['subscription']['start_date']);
+            }
+            if (data['subscription']['end_date'] != null) {
+              endDate = DateTime.parse(data['subscription']['end_date']);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      print('Exception lors de la récupération de l\'abonnement: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _getSubscriptionStatus() {
+    if (!hasSubscription) return "INACTIF";
+    if (endDate == null) return "INACTIF";
+
+    final now = DateTime.now();
+    if (endDate!.isBefore(now)) {
+      return "EXPIRÉ";
+    } else {
+      return "ACTIF";
+    }
+  }
+
+  Color _getStatusColor() {
+    final status = _getSubscriptionStatus();
+    if (status == "ACTIF") return Colors.green;
+    if (status == "EXPIRÉ") return Colors.orange;
+    return Colors.grey;
+  }
+
   Future<bool> _checkUserHasPortfolio() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -57,7 +142,8 @@ class SettingsPage extends StatelessWidget {
         final data = json.decode(response.body);
         return data['hasPortfolio'] ?? false;
       } else {
-        print('Erreur lors de la vérification du portfolio: ${response.statusCode}');
+        print(
+            'Erreur lors de la vérification du portfolio: ${response.statusCode}');
         return false;
       }
     } catch (e) {
@@ -66,52 +152,41 @@ class SettingsPage extends StatelessWidget {
     }
   }
 
-  // Fonction pour rediriger vers la page appropriée
-  // Fonction pour rediriger vers la page appropriée
   Future<void> _navigateToPortfolioPage(BuildContext context) async {
-    // Afficher un indicateur de chargement
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
+    if (widget.user == null) return;
+    myCustomLoadingIndicator(context);
 
     try {
       final hasPortfolio = await _checkUserHasPortfolio();
-
-      // Fermer l'indicateur de chargement
-      Navigator.pop(context);
-
-      if (hasPortfolio) {
-        // Rediriger vers la page de modification du portfolio
-        // Ne pas passer d'ID pour afficher le portfolio de l'utilisateur connecté
-        Navigator.pushNamed(context, '/freelancer_portfolio');
-      } else {
-        // Rediriger vers la page de création du portfolio
-        Navigator.pushNamed(
-            context,
-            '/portefolioedit',
-            arguments: {'isFirstLogin': true}
-        );
+      if (mounted) {
+        Navigator.pop(context);
+        if (!hasPortfolio) {
+          if (widget.user!.isEnterprise) {
+            Navigator.pushNamed(context, '/entreprise/create');
+          } else {
+            Navigator.pushNamed(context, '/freelancer_portfolio');
+          }
+        } else {
+          if (widget.user!.isEnterprise) {
+            Navigator.pushNamed(context, '/entreprise/home');
+          } else {
+            Navigator.pushNamed(context, '/portefolioedit',
+                arguments: {'isFirstLogin': true});
+          }
+        }
       }
     } catch (e) {
-      // Fermer l'indicateur de chargement en cas d'erreur
       Navigator.pop(context);
-
-      // Afficher un message d'erreur
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la vérification du portfolio: $e')),
+        SnackBar(
+            content: Text('Erreur lors de la vérification du portfolio: $e')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {  // Wrap the entire build method with Obx()
+    return Obx(() {
       final isDark = themeController.isDarkMode.value;
       final bgColor = isDark ? darkPrimaryColor : primaryColor;
       final textColor = Colors.white;
@@ -138,7 +213,8 @@ class SettingsPage extends StatelessWidget {
                   builder: (context) => AlertDialog(
                     title: Text('Aide'.tr),
                     content: Text(
-                        'Besoin d\'aide avec les paramètres ? Contactez notre support technique au 0549819905'.tr),
+                        'Besoin d\'aide avec les paramètres ? Contactez notre support technique au 0549819905'
+                            .tr),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
@@ -174,20 +250,22 @@ class SettingsPage extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 2),
-                              color: isDark ? darkSecondaryColor : secondaryColor,
+                              color:
+                                  isDark ? darkSecondaryColor : secondaryColor,
                             ),
-                            child: user?.profilePicture?.isNotEmpty ?? false
+                            child: widget.user?.profilePicture?.isNotEmpty ??
+                                    false
                                 ? ClipOval(
-                              child: Image.network(
-                                "http://$baseURL/$userAPI${user!.profilePicture!}",
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (context, error, stackTrace) =>
-                                    Text('Erreur de chargement'.tr),
-                              ),
-                            )
+                                    child: Image.network(
+                                      "http://$baseURL/$userAPI${widget.user!.profilePicture!}",
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Text('Erreur de chargement'.tr),
+                                    ),
+                                  )
                                 : Icon(Icons.person,
-                                size: 50, color: Colors.black54),
+                                    size: 50, color: Colors.black54),
                           ),
                           Positioned(
                             bottom: 0,
@@ -197,19 +275,20 @@ class SettingsPage extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Colors.black,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
+                                border:
+                                    Border.all(color: Colors.white, width: 2),
                               ),
-                              child:
-                              Icon(Icons.edit, size: 16, color: Colors.white),
+                              child: Icon(Icons.edit,
+                                  size: 16, color: Colors.white),
                             ),
                           ),
                         ],
                       ),
                     ),
                     SizedBox(height: 10),
-                    if (user != null) ...[
+                    if (widget.user != null) ...[
                       Text(
-                        "${user!.lastName} ${user!.firstName}",
+                        "${widget.user!.lastName} ${widget.user!.firstName}",
                         style: TextStyle(
                           color: textColor,
                           fontSize: 20,
@@ -217,7 +296,7 @@ class SettingsPage extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        user!.email,
+                        widget.user!.email,
                         style: TextStyle(color: Colors.white70),
                       ),
                     ]
@@ -242,17 +321,23 @@ class SettingsPage extends StatelessWidget {
                         icon: Icons.person,
                         title: 'Modifier le profil'.tr,
                         subtitle: 'Modifiez vos informations personnelles'.tr,
-                        iconBgColor: isDark ? darkSecondaryColor : secondaryColor,
+                        iconBgColor:
+                            isDark ? darkSecondaryColor : secondaryColor,
                         onTap: () {
                           Navigator.pushNamed(context, '/profile/edit'.tr);
                         }),
                     _buildSettingTile(
                         icon: Icons.notifications,
                         title: 'Modifier le compte'.tr,
-                        subtitle: 'Modifier votre compte public et portefolio'.tr,
-                        iconBgColor: isDark ? darkSecondaryColor : secondaryColor,
+                        subtitle: widget.user == null
+                            ? ""
+                            : widget.user!.isEnterprise
+                                ? 'Modifier les coordonnées de votre entreprise'.tr
+                                : 'Modifier votre compte public et portefolio'
+                                    .tr,
+                        iconBgColor:
+                            isDark ? darkSecondaryColor : secondaryColor,
                         onTap: () {
-                          // Utiliser la nouvelle fonction pour rediriger vers la page appropriée
                           _navigateToPortfolioPage(context);
                         }),
 
@@ -260,7 +345,8 @@ class SettingsPage extends StatelessWidget {
                         icon: Icons.dashboard,
                         title: 'Tableau de bord'.tr,
                         subtitle: 'Vue globale des offres d emplois'.tr,
-                        iconBgColor: isDark ? darkSecondaryColor : secondaryColor,
+                        iconBgColor:
+                            isDark ? darkSecondaryColor : secondaryColor,
                         onTap: () {
                           Navigator.pushNamed(context, '/dashboard'.tr);
                         }),
@@ -278,7 +364,8 @@ class SettingsPage extends StatelessWidget {
                         icon: Icons.lock_outline,
                         title: 'Confidentialité'.tr,
                         subtitle: 'Gérez la sécurité de votre compte'.tr,
-                        iconBgColor: isDark ? darkSecondaryColor : secondaryColor,
+                        iconBgColor:
+                            isDark ? darkSecondaryColor : secondaryColor,
                         onTap: () {
                           Navigator.pushNamed(context, '/confidentialite'.tr);
                         }),
@@ -286,37 +373,52 @@ class SettingsPage extends StatelessWidget {
                         icon: Icons.description,
                         title: 'Contrats'.tr,
                         subtitle: 'Gérez vos contrats'.tr,
-                        iconBgColor: isDark ? darkSecondaryColor : secondaryColor,
+                        iconBgColor:
+                            isDark ? darkSecondaryColor : secondaryColor,
                         onTap: () {
                           Navigator.pushNamed(context, '/contract/'.tr);
                         }),
                     _buildSettingTile(
                         icon: Icons.bar_chart,
                         title: 'Statistiques'.tr,
-                        subtitle: 'Consultez vos statistiques d\'utilisation'.tr,
-                        iconBgColor: isDark ? darkSecondaryColor : secondaryColor,
+                        subtitle:
+                            'Consultez vos statistiques d\'utilisation'.tr,
+                        iconBgColor:
+                            isDark ? darkSecondaryColor : secondaryColor,
                         onTap: () {
-                          Navigator.pushNamed(context, '/profile/statistics'.tr);
+                          Navigator.pushNamed(
+                              context, '/profile/statistics'.tr);
                         }),
 
                     _buildSectionHeader('Abonnement'.tr),
                     _buildSettingTile(
                         icon: Icons.star,
-                        title: 'Plan Premium'.tr,
-                        subtitle: 'Gérez votre abonnement'.tr,
-                        trailing: Container(
-                          padding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            'ACTIF'.tr,
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ),
-                        iconBgColor: isDark ? darkSecondaryColor : secondaryColor,
+                        title: currentPlan == null
+                            ? ""
+                            : currentPlan!.isNotEmpty
+                                ? currentPlan!
+                                : 'Aucun abonnement'.tr,
+                        subtitle: hasSubscription && endDate != null
+                            ? 'Expire le ${DateFormat('dd/MM/yyyy').format(endDate!)}'
+                            : 'Gérez votre abonnement'.tr,
+                        trailing: currentPlan == null
+                            ? CircularProgressIndicator(
+                                color: isDark ? darkPrimaryColor : primaryColor)
+                            : Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: _getStatusColor(),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  _getSubscriptionStatus().tr,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 12),
+                                ),
+                              ),
+                        iconBgColor:
+                            isDark ? darkSecondaryColor : secondaryColor,
                         onTap: () {
                           Navigator.pushNamed(context, '/subscription'.tr);
                         }),
@@ -341,8 +443,8 @@ class SettingsPage extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => ThemeSettingsPage())
-                        );
+                            MaterialPageRoute(
+                                builder: (context) => ThemeSettingsPage()));
                       },
                     ),
 
@@ -351,7 +453,8 @@ class SettingsPage extends StatelessWidget {
                         icon: Icons.help_outline,
                         title: 'Centre d\'aide'.tr,
                         subtitle: 'FAQ et guides'.tr,
-                        iconBgColor: isDark ? darkSecondaryColor : secondaryColor,
+                        iconBgColor:
+                            isDark ? darkSecondaryColor : secondaryColor,
                         onTap: () {
                           Navigator.pushNamed(context, '/faq'.tr);
                         }),
@@ -399,7 +502,9 @@ class SettingsPage extends StatelessWidget {
       child: Text(
         title,
         style: TextStyle(
-          color: themeController.isDarkMode.value ? Colors.white70 : Colors.black54,
+          color: themeController.isDarkMode.value
+              ? Colors.white70
+              : Colors.black54,
           fontSize: 14,
           fontWeight: FontWeight.bold,
         ),
@@ -423,7 +528,10 @@ class SettingsPage extends StatelessWidget {
           color: iconBgColor,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: themeController.isDarkMode.value ? Colors.white : Colors.black87),
+        child: Icon(icon,
+            color: themeController.isDarkMode.value
+                ? Colors.white
+                : Colors.black87),
       ),
       title: Text(
         title,
@@ -436,12 +544,18 @@ class SettingsPage extends StatelessWidget {
       subtitle: Text(
         subtitle,
         style: TextStyle(
-          color: themeController.isDarkMode.value ? Colors.white70 : Colors.black54,
+          color: themeController.isDarkMode.value
+              ? Colors.white70
+              : Colors.black54,
           fontSize: 14,
         ),
       ),
-      trailing: trailing ?? Icon(Icons.arrow_forward_ios, size: 16,
-          color: themeController.isDarkMode.value ? Colors.white70 : Colors.black54),
+      trailing: trailing ??
+          Icon(Icons.arrow_forward_ios,
+              size: 16,
+              color: themeController.isDarkMode.value
+                  ? Colors.white70
+                  : Colors.black54),
       onTap: onTap,
     );
   }
@@ -453,7 +567,7 @@ class SettingsPage extends StatelessWidget {
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/login'.tr,
-            (route) => false,
+        (route) => false,
       );
     }
   }

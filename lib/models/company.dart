@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -33,12 +34,24 @@ class Testimonial {
       'rating': rating,
     };
   }
+
+  Testimonial copy() {
+    return Testimonial(
+      name: name,
+      company: company,
+      comment: comment,
+      image: image,
+      rating: rating,
+    );
+  }
 }
 
 class InnovationsModel {
-  final String title, description;
-  final IconData icon;
-  const InnovationsModel({
+  int id;
+  String title, description;
+  IconData icon;
+  InnovationsModel({
+    required this.id,
     required this.title,
     required this.description,
     required this.icon,
@@ -46,6 +59,7 @@ class InnovationsModel {
 
   factory InnovationsModel.fromMap(map) {
     return InnovationsModel(
+      id: map['id'],
       title: map['title'] as String,
       description: map['description'] as String,
       icon: icons[map['icon']] as IconData,
@@ -66,11 +80,21 @@ class InnovationsModel {
 
   static Map<String, dynamic> toMap(InnovationsModel inovation) {
     return {
+      'id': inovation.id,
       'title': inovation.title,
       'description': inovation.description,
       'icon':
           icons.entries.firstWhere((icon) => icon.value == inovation.icon).key,
     };
+  }
+
+  InnovationsModel copy() {
+    return InnovationsModel(
+      id: id,
+      title: title,
+      description: description,
+      icon: icon,
+    );
   }
 }
 
@@ -131,12 +155,17 @@ class CompanyModel {
     return null;
   }
 
-  static Future<List<CompanyModel>?> fetchAll(id, filter) async {
+  static Future<List<CompanyModel>?> fetchAll(
+      {id, filter, pagination, search}) async {
     final prefs = await SharedPreferences.getInstance();
     final sessionCookie = prefs.getString('session_cookie');
     final response = await http.get(
-      Uri.parse(
-          "$httpURL/api/entreprise/?${id != null ? "id=$id" : ""}${id != null && filter != null ? "&" : ""}${filter != null ? "filter=$filter" : ""}"),
+      Uri.parse("$httpURL/api/entreprise/").replace(queryParameters: {
+        if (id != null) "id": id.toString(),
+        if (filter != null) "filter": filter.toString(),
+        if (pagination != null) "pagination": pagination.toString(),
+        if (search != null) "search": search.toString(),
+      }),
       headers: {
         'Cookie': "sessionid=$sessionCookie",
       },
@@ -153,7 +182,13 @@ class CompanyModel {
     return null;
   }
 
-  static Future<dynamic> update(CompanyModel company) async {
+  static Future<dynamic> update(
+    CompanyModel company,
+    List<int> removedJobs,
+    List<int> removedInnovations,
+    Uint8List? imageBytes,
+    String? imageName,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final sessionCookie = prefs.getString('session_cookie');
     String? csrfToken = prefs.getString('csrf_token');
@@ -164,23 +199,22 @@ class CompanyModel {
       csrfCookie = temp['csrf_cookie'];
     }
     try {
-      print(company.toMap());
-      // final response = await http.post(
-      //   Uri.parse("$httpURL/api/entreprise/"),
-      //   headers: {
-      //     'Cookie': "sessionid=$sessionCookie;csrftoken=$csrfCookie",
-      //     'X-CSRFToken': csrfToken!,
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: json.encode({}),
-      // );
-      // if (response.statusCode == 200) {
-      //   return true;
-      // }
-      return {
-        "type": "Failed",
-        "message": "Failed trying to update the company."
-      };
+      final response = await http.put(
+        Uri.parse("$httpURL/api/entreprise/"),
+        headers: {
+          'Cookie': "sessionid=$sessionCookie;csrftoken=$csrfCookie",
+          'X-CSRFToken': csrfToken!,
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          "removed_jobs": removedJobs,
+          "removed_innovations": removedInnovations,
+          if (imageBytes != null && imageName != null) "image": base64Encode(imageBytes),
+          if (imageBytes != null && imageName != null) "image_name": imageName,
+          "entreprise": {...company.toMap()},
+        }),
+      );
+      return json.decode(response.body);
     } catch (e) {
       return {
         "type": "Connection error",
@@ -297,9 +331,9 @@ class CompanyModel {
       companyLinkedIn: companyLinkedIn,
       aboutCompany: aboutCompany,
       companyMission: companyMission,
-      productsList: productsList,
-      testimonialsList: testimonialsList,
-      innovationAreas: innovationAreas,
+      productsList: productsList.map((item) => item.copy()).toList(),
+      testimonialsList: testimonialsList.map((item) => item.copy()).toList(),
+      innovationAreas: innovationAreas.map((item) => item.copy()).toList(),
       solutionsCount: solutionsCount,
       clientsCount: clientsCount,
       satisfactionRate: satisfactionRate,

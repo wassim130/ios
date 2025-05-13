@@ -33,7 +33,7 @@ class MessageInputBottomSheetState extends State<MessageInputBottomSheet> {
   List<int> imageBytes = [];
 
   int? messageUpdatingID;
-
+  String filename = "";
   final FocusNode focusNode = FocusNode();
   late final TextEditingController messageController;
 
@@ -85,7 +85,9 @@ class MessageInputBottomSheetState extends State<MessageInputBottomSheet> {
                 IconButton(
                   icon: Icon(_attachmentType == AttachmentType.image
                       ? Icons.image
-                      : Icons.location_on),
+                      : _attachmentType == AttachmentType.file
+                          ? Icons.file_copy
+                          : Icons.location_on),
                   onPressed: () async {},
                   tooltip: 'Attach Image'.tr,
                 ),
@@ -97,7 +99,8 @@ class MessageInputBottomSheetState extends State<MessageInputBottomSheet> {
                           color: const Color.fromARGB(255, 243, 33, 33),
                         ),
                         child: Text(
-                          'Location: ${_position!.latitude.toStringAsFixed(2)}, ${_position!.longitude.toStringAsFixed(2)}'.tr,
+                          'Location: ${_position!.latitude.toStringAsFixed(2)}, ${_position!.longitude.toStringAsFixed(2)}'
+                              .tr,
                           style: TextStyle(fontSize: 14),
                         ),
                       )
@@ -109,9 +112,18 @@ class MessageInputBottomSheetState extends State<MessageInputBottomSheet> {
                               height: 60,
                             ),
                           )
-                        : Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                        : _attachmentType == AttachmentType.file
+                            ? Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(
+                                  'File: $filename',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              )
+                            : Center(
+                                child: CircularProgressIndicator(),
+                              ),
               ],
             ),
           Sheet(
@@ -119,7 +131,7 @@ class MessageInputBottomSheetState extends State<MessageInputBottomSheet> {
             messageController: messageController,
             onRecordingStateChanged: widget.onRecordingStateChanged,
             isEditing: isEditing,
-            onAttachmentStateChanged: (type, value) {
+            onAttachmentStateChanged: (type, value,{String name = ""}) {
               setState(() {
                 switch (type) {
                   case AttachmentType.none:
@@ -129,11 +141,16 @@ class MessageInputBottomSheetState extends State<MessageInputBottomSheet> {
                     _isAttachement = true;
                     _attachmentType = AttachmentType.image;
                     imageBytes = value;
+                    filename = name;
                     break;
                   case AttachmentType.location:
                     _isAttachement = true;
                     _attachmentType = AttachmentType.location;
                     _position = value;
+                  case AttachmentType.file:
+                    _isAttachement = true;
+                    _attachmentType = AttachmentType.file;
+                    filename = name;
                     break;
                 }
               });

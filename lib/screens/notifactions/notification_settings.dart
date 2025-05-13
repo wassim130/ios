@@ -1,9 +1,18 @@
-import 'package:ahmini/helper/notification_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ahmini/theme.dart';
 import '../../controllers/theme_controller.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+enum NotificationType {
+  messages,
+  subscriptions,
+  security,
+  contracts,
+  ads,
+}
 
 class NotificationSettingsPage extends StatefulWidget {
   static const String routeName = '/notifications/settings';
@@ -16,11 +25,120 @@ class NotificationSettingsPage extends StatefulWidget {
 
 class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   late ThemeController themeController;
+  Map<NotificationType, bool> notificationSettings = {
+    NotificationType.messages: true,
+    NotificationType.subscriptions: true,
+    NotificationType.security: true,
+    NotificationType.contracts: true,
+    NotificationType.ads: true,
+  };
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     themeController = Get.find<ThemeController>();
+    _loadNotificationSettings();
+  }
+
+  Future<void> _loadNotificationSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionCookie = prefs.getString('session_cookie');
+      final csrfToken = prefs.getString('csrf_token');
+
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8000/api/notification/notification-settings/'),
+        headers: {
+          'Cookie': sessionCookie != null ? "sessionid=$sessionCookie" : "",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          notificationSettings[NotificationType.messages] = data['settings']['messages'] ?? true;
+          notificationSettings[NotificationType.subscriptions] = data['settings']['subscriptions'] ?? true;
+          notificationSettings[NotificationType.security] = data['settings']['security'] ?? true;
+          notificationSettings[NotificationType.contracts] = data['settings']['contracts'] ?? true;
+          notificationSettings[NotificationType.ads] = data['settings']['ads'] ?? true;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        print('Failed to load settings: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error loading settings: $e');
+    }
+  }
+
+  Future<void> _updateNotificationSetting(NotificationType type, bool value) async {
+    setState(() {
+      notificationSettings[type] = value;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionCookie = prefs.getString('session_cookie');
+      final csrfToken = prefs.getString('csrf_token');
+      final csrfCookie = prefs.getString('csrf_cookie');
+
+      final payload = {
+        'messages': notificationSettings[NotificationType.messages],
+        'subscriptions': notificationSettings[NotificationType.subscriptions],
+        'security': notificationSettings[NotificationType.security],
+        'contracts': notificationSettings[NotificationType.contracts],
+        'ads': notificationSettings[NotificationType.ads],
+      };
+
+      final headers = {
+        'Content-Type': 'application/json',
+      };
+
+      if (sessionCookie != null) {
+        headers['Cookie'] = "sessionid=$sessionCookie";
+        if (csrfCookie != null) {
+          headers['Cookie'] = "${headers['Cookie']}; csrftoken=$csrfCookie";
+        }
+      }
+
+      if (csrfToken != null) {
+        headers['X-CSRFToken'] = csrfToken;
+      }
+
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:8000/api/notification/notification-settings/'),
+        headers: headers,
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode != 200) {
+        // Revert if update fails
+        setState(() {
+          notificationSettings[type] = !value;
+        });
+        Get.snackbar(
+          'Error',
+          'Failed to update notification settings: ${response.statusCode}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      setState(() {
+        notificationSettings[type] = !value;
+      });
+      Get.snackbar(
+        'Error',
+        'Failed to update notification settings: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   @override
@@ -38,41 +156,33 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           title: Text('Notifications'.tr,
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
           actions: [
             IconButton(
-                icon: Icon(
-                  Icons.help_outline_sharp,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(
-                        'Notifications Settings'.tr,
+              icon: Icon(Icons.help_outline_sharp, color: Colors.white),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Notifications Settings'.tr),
+                    content: Text('Besoin d\'aide avec les paramètres ? Contactez notre support technique au 0542794170'.tr),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('Fermer'.tr),
                       ),
-                      content: Text(
-                          'Besoin d\'aide avec les paramètres ? Contactez notre support technique au 0542794170'.tr),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text('Fermer'.tr),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+                    ],
+                  ),
+                );
+              },
+            ),
           ],
         ),
-        body: Column(
+        body: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
@@ -81,7 +191,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    "Geréz les notifications",
+                    "Gérez les notifications",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 24,
@@ -91,7 +201,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Choisissez quelles notifications vous souhaitez recevoir..",
+                    "Choisissez quelles notifications vous souhaitez recevoir",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
@@ -110,7 +220,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                     topRight: Radius.circular(36),
                   ),
                 ),
-                child: settingsSection(isDark, primaryColorTheme, textColor),
+                child: _buildSettingsList(isDark, textColor),
               ),
             ),
           ],
@@ -119,83 +229,76 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     });
   }
 
-  SingleChildScrollView settingsSection(bool isDark, Color primaryColorTheme, Color textColor) {
+  Widget _buildSettingsList(bool isDark, Color textColor) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionHeader("Messages", isDark),
-          MyListTile(
-            text: "Toute les message ",
-            children: [
-              TileChild(
-                key: GlobalKey<_TileChild>(),
-                text: "call",
-                notificationSettingsKey: NotificationSetting.call,
-                onTap: (value) {},
-              ),
-              TileChild(
-                key: GlobalKey<_TileChild>(),
-                text: "mentions",
-                notificationSettingsKey: NotificationSetting.mentions,
-                onTap: (value) {},
-              ),
-              TileChild(
-                key: GlobalKey<_TileChild>(),
-                text: "reactions",
-                notificationSettingsKey: NotificationSetting.reactions,
-                onTap: (value) {},
-              ),
-            ],
+          _buildNotificationSwitch(
+            "Messages",
+            "Recevoir des notifications pour les nouveaux messages",
+            NotificationType.messages,
+            isDark,
           ),
-          _buildSectionHeader("Category", isDark),
-          MyListTile(
-            text: "Contract",
-            children: [
-              TileChild(
-                key: GlobalKey<_TileChild>(),
-                text: "Réservations",
-                notificationSettingsKey: 'key'.tr,
-                onTap: (value) {},
-              ),
-              TileChild(
-                key: GlobalKey<_TileChild>(),
-                text: "Commandes",
-                notificationSettingsKey: 'key2'.tr,
-                onTap: (value) {},
-              ),
-              TileChild(
-                key: GlobalKey<_TileChild>(),
-                text: "Livraisons",
-                notificationSettingsKey: 'key3'.tr,
-                onTap: (value) {},
-              ),
-              TileChild(
-                key: GlobalKey<_TileChild>(),
-                text: "Retours",
-                notificationSettingsKey: 'key4'.tr,
-                onTap: (value) {},
-              ),
-            ],
+          _buildSectionHeader("Abonnements", isDark),
+          _buildNotificationSwitch(
+            "Abonnements",
+            "Recevoir des notifications concernant votre abonnement",
+            NotificationType.subscriptions,
+            isDark,
           ),
-          MyListTile(
-            text: "something idk",
-            notificationSettingsKey: 'test'.tr,
+          _buildSectionHeader("Sécurité", isDark),
+          _buildNotificationSwitch(
+            "Sécurité",
+            "Recevoir des notifications de sécurité importantes",
+            NotificationType.security,
+            isDark,
           ),
-          MyListTile(
-            text: "something idk",
-            notificationSettingsKey: 'test2'.tr,
+          _buildSectionHeader("Contrats", isDark),
+          _buildNotificationSwitch(
+            "Contrats",
+            "Recevoir des notifications concernant vos contrats",
+            NotificationType.contracts,
+            isDark,
           ),
-          MyListTile(
-            text: "something idk",
-            notificationSettingsKey: 'test3'.tr,
-          ),
-          MyListTile(
-            text: "something idk",
-            notificationSettingsKey: 'test4'.tr,
+          _buildSectionHeader("Publicité", isDark),
+          _buildNotificationSwitch(
+            "Publicité",
+            "Recevoir des offres promotionnelles et publicitaires",
+            NotificationType.ads,
+            isDark,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildNotificationSwitch(
+      String title,
+      String subtitle,
+      NotificationType type,
+      bool isDark,
+      ) {
+    return SwitchListTile(
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
+          color: isDark ? Colors.white : Colors.black,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          color: isDark ? Colors.white70 : Colors.black54,
+        ),
+      ),
+      value: notificationSettings[type] ?? true,
+      onChanged: (value) => _updateNotificationSetting(type, value),
+      activeColor: primaryColor,
+      inactiveTrackColor: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
     );
   }
 
@@ -210,331 +313,6 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           fontWeight: FontWeight.bold,
         ),
       ),
-    );
-  }
-}
-
-class MyListTile extends StatefulWidget {
-  final String text;
-  final List<TileChild> children;
-  final GestureTapCallback? onTap;
-  final String? notificationSettingsKey;
-
-  const MyListTile({
-    Key? key,
-    required this.text,
-    this.children = const [],
-    this.onTap,
-    this.notificationSettingsKey,
-  }) : super(key: key);
-
-  @override
-  State<MyListTile> createState() => _MyListTileState();
-}
-
-class _MyListTileState extends State<MyListTile> {
-  late bool _isSwitched, _isExpanded;
-  late String text;
-  late List<TileChild> children;
-  late String? notificationSettingsKey;
-
-  @override
-  void initState() {
-    _isSwitched = false;
-    text = widget.text;
-    children = widget.children;
-    _isExpanded = false;
-    notificationSettingsKey = widget.notificationSettingsKey;
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateSwitchState();
-    });
-  }
-
-  Future<void> _updateSwitchState() async {
-    bool allChecked = true;
-    for (var child in children) {
-      if (!await child.getState()) {
-        allChecked = false;
-        break;
-      }
-    }
-    if (_isSwitched != allChecked) {
-      _isSwitched = allChecked;
-    }
-    if (children.isEmpty && notificationSettingsKey != null) {
-      SharedPreferences perfs = await SharedPreferences.getInstance();
-      _isSwitched = perfs.getBool(notificationSettingsKey!) ?? false;
-    }
-    setState(() {});
-  }
-
-  Future<void> _saveSetting() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool(notificationSettingsKey!, _isSwitched);
-  }
-
-  void _updateChildren(bool newValue) {
-    _isSwitched = newValue;
-    for (var child in children) {
-      child.saveSetting(newValue);
-      child.key.currentState?.setState(() {
-        if (child.key.currentState!.localSwitchValue != newValue) {
-          child.key.currentState!.localSwitchValue = newValue;
-          child.onTap(newValue);
-        }
-      });
-    }
-
-    if (children.isEmpty && notificationSettingsKey != null) {
-      _saveSetting();
-    }
-
-    setState(() {});
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_isSwitched ? '$text ON' : '$text OFF'.tr),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        border: Border(
-            bottom: BorderSide(
-                width: 1, color: const Color.fromARGB(134, 0, 0, 0))),
-      ),
-      child: children.isEmpty
-          ? ListTile(
-        title: Text(
-          text,
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.black,
-          ),
-        ),
-        trailing: Transform.scale(
-          scale: 0.9,
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: 200),
-            width: 70,
-            height: 30,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25),
-              color: _isSwitched
-                  ? primaryColor
-                  : Colors.grey.withOpacity(0.4),
-            ),
-            child: Stack(
-              children: [
-                AnimatedPositioned(
-                  duration: Duration(milliseconds: 150),
-                  left: _isSwitched ? 42 : 0,
-                  top: 2,
-                  child: Container(
-                    width: 26,
-                    height: 26,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _isSwitched ? Colors.white : primaryColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        onTap: () {
-          if (widget.onTap != null) {
-            widget.onTap!();
-          }
-          _updateChildren(!_isSwitched);
-        },
-      )
-          : ExpansionTile(
-        leading: AnimatedRotation(
-          turns: _isExpanded ? 0.5 : 0.0, // 0.5 means 180 degrees
-          duration: Duration(milliseconds: 200),
-          child: Icon(Icons.expand_more,
-              color: _isExpanded ? primaryColor : Colors.black),
-        ),
-        title: Text(
-          text,
-          style: TextStyle(
-              fontSize: 18,
-              color: _isExpanded ? backgroundColor : Colors.black),
-        ),
-        trailing: Transform.scale(
-          scale: 0.9,
-          child: GestureDetector(
-            onTap: () {
-              _updateChildren(!_isSwitched);
-            },
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: 200),
-              width: 70,
-              height: 30,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-                color: _isSwitched
-                    ? primaryColor
-                    : Colors.grey.withOpacity(0.4),
-              ),
-              child: Stack(
-                children: [
-                  AnimatedPositioned(
-                    duration: Duration(milliseconds: 150),
-                    left: _isSwitched ? 42 : 0,
-                    top: 2,
-                    child: Container(
-                      width: 26,
-                      height: 26,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _isSwitched ? Colors.white : primaryColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        shape: Border(),
-        onExpansionChanged: (expanded) {
-          setState(() {
-            _isExpanded = expanded;
-          });
-        },
-        children: children,
-      ),
-    );
-  }
-}
-
-class TileChild extends StatefulWidget {
-  final String text;
-  final String notificationSettingsKey;
-  final void Function(bool) onTap;
-  final GlobalKey<_TileChild> key;
-
-  const TileChild({
-    required this.key,
-    required this.text,
-    required this.notificationSettingsKey,
-    required this.onTap,
-  });
-
-  Future<bool> getState() async {
-    SharedPreferences perfs = await SharedPreferences.getInstance();
-    final bool? temp = perfs.getBool(notificationSettingsKey);
-    return temp ?? false;
-  }
-
-  Future<void> saveSetting(bool newValue) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool(notificationSettingsKey, newValue);
-  }
-
-  @override
-  State<TileChild> createState() => _TileChild();
-}
-
-class _TileChild extends State<TileChild> {
-  late bool localSwitchValue;
-
-  @override
-  void initState() {
-    localSwitchValue = false;
-    _loadSetting();
-    super.initState();
-  }
-
-  void _checkChildrenState() {
-    final parentState = context.findAncestorStateOfType<_MyListTileState>();
-    bool allChecked = true;
-    if (parentState != null) {
-      for (var child in parentState.children) {
-        if (!child.key.currentState!.localSwitchValue) allChecked = false;
-      }
-      if (parentState._isSwitched != allChecked) {
-        parentState.setState(() {
-          parentState._isSwitched = allChecked;
-        });
-      }
-    }
-  }
-
-  Future<void> _saveSetting() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool(widget.notificationSettingsKey, localSwitchValue);
-  }
-
-  Future<void> _loadSetting() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final bool? temp = prefs.getBool(widget.notificationSettingsKey);
-    localSwitchValue = temp ?? false;
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-            bottom:
-            BorderSide(width: 2, color: const Color.fromARGB(41, 0, 0, 0))),
-      ),
-      child: ListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-          leading: RotatedBox(
-            quarterTurns: 90,
-            child: Icon(
-              Icons.linear_scale_rounded,
-              color: localSwitchValue
-                  ? Colors.green
-                  : Colors.black.withOpacity(0.3),
-            ),
-          ),
-          title: Text(
-            widget.text,
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-            ),
-          ),
-          trailing: Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 12,
-            children: [
-              Text(
-                localSwitchValue ? 'ON' : 'OFF'.tr,
-                style: TextStyle(
-                  color: localSwitchValue
-                      ? Colors.green
-                      : Colors.grey.withOpacity(0.6),
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios, size: 16),
-            ],
-          ),
-          onTap: () {
-            setState(() {
-              localSwitchValue = !localSwitchValue;
-            });
-            //save locally
-            _saveSetting();
-            widget.onTap(localSwitchValue);
-            _checkChildrenState();
-          }),
     );
   }
 }

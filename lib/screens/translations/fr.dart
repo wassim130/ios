@@ -60,6 +60,50 @@ final Map<String, String> fr = {
   'profil_mis_a_jour': 'Profil mis à jour',
   'changer_photo': 'Changer la photo',
   'telecharger_photo': 'Télécharger une photo',
+  'Modifier les coordonnées de votre entreprise': 'Modifier les coordonnées de votre entreprise',
+  'Modifier votre compte public et portefolio': 'Modifier votre compte public et portefolio',
+  'Personnalisez votre profil'  : 'Personnalisez votre profil',
+  'Profil complété à 80%': 'Profil complété à 80%',
+  'Modifier votre profil' : 'Modifier votre profil',
+
+  // Compte
+  'Créez votre entreprise': 'Créez votre entreprise',
+  'Bienvenue sur votre entreprise': 'Bienvenue sur votre entreprise',
+  'Créez votre entreprise professionnel pour vous démarquer auprès des clients potentiels.': 'Créez votre entreprise professionnel pour vous démarquer auprès des clients potentiels.',
+  'Informations personnelles': 'Informations personnelles',
+  'Ajoutez vos informations de base pour que les clients puissent vous connaître.': 'Ajoutez vos informations de base pour que les clients puissent vous connaître.',
+  'Expérience professionnelle': 'Expérience professionnelle',
+  'Partagez votre parcours et vos compétences pour attirer les bons projets.': 'Partagez votre parcours et vos compétences pour attirer les bons projets.',
+  'Coordonnées': 'Coordonnées',
+  'Ajoutez vos coordonnées pour que les clients puissent vous contacter facilement.': 'Ajoutez vos coordonnées pour que les clients puissent vous contacter facilement.',
+  'Projets': 'Projets',
+  'Ajoutez vos projets pour montrer votre expertise et votre expérience.': 'Ajoutez vos projets pour montrer votre expertise et votre expérience.',
+  'Votre portfolio est votre vitrine professionnelle. Commencez par ajouter une photo professionnelle et votre nom complet pour vous présenter aux clients potentiels.': 'Votre portfolio est votre vitrine professionnelle. Commencez par ajouter une photo professionnelle et votre nom complet pour vous présenter aux clients potentiels.',
+  'Votre résumé personnel est souvent la première chose que les clients lisent. Soyez concis et mettez en avant vos points forts.': 'Votre résumé personnel est souvent la première chose que les clients lisent. Soyez concis et mettez en avant vos points forts.',
+  'Détaillez votre expérience professionnelle en mettant l\'accent sur les compétences pertinentes pour les projets que vous souhaitez obtenir. Un CV bien structuré augmente vos chances d\'être sélectionné.': 'Détaillez votre expérience professionnelle en mettant l\'accent sur les compétences pertinentes pour les projets que vous souhaitez obtenir. Un CV bien structuré augmente vos chances d\'être sélectionné.',
+  'Assurez-vous que vos coordonnées sont à jour pour que les clients puissent vous contacter facilement. L\'email de contact sera visible publiquement, alors utilisez une adresse professionnelle.': 'Assurez-vous que vos coordonnées sont à jour pour que les clients puissent vous contacter facilement. L\'email de contact sera visible publiquement, alors utilisez une adresse professionnelle.',
+  'Ajoutez vos meilleurs projets pour montrer votre expertise. Incluez une description claire et les technologies utilisées. Des images de qualité augmenteront l\'attractivité de votre portfolio.': 'Ajoutez vos meilleurs projets pour montrer votre expertise. Incluez une description claire et les technologies utilisées. Des images de qualité augmenteront l\'attractivité de votre portfolio.',
+  'Conseils': 'Conseils',
+  'À propos de vous': 'À propos de vous',
+  'Expérience professionnelle': 'Expérience professionnelle',
+  'Télécharger votre CV': 'Télécharger votre CV',
+  'Formats acceptés: PDF, DOC, DOCX': 'Formats acceptés: PDF, DOC, DOCX',
+  'Coordonnées': 'Coordonnées',
+  'Ajouter': 'Ajouter',
+  'Projets': 'Projets',
+  'Aucun projet pour le moment': 'Aucun projet pour le moment',
+  'Ajoutez vos projets pour montrer votre expertise': 'Ajoutez vos projets pour montrer votre expertise',
+
+  // Dashboard
+  'Gérez vos offres d\'emploi et les candidatures reçues': 'Gérez vos offres d\'emploi et les candidatures reçues',
+  'Modifier Portefeuille': 'Modifier Portefeuille',
+  'offres':'offres',
+  'Candidats': 'Candidats',
+  'Pending' : 'Pending',
+  'Offres d\'emploi': 'Offres d\'emploi',
+  'Votre Portefeuille Professionnel': 'Votre Portefeuille Professionnel',
+  'Besoin d\'aide avec votre portefeuille? Contactez notre support technique au 0549819905': 'Besoin d\'aide avec votre portefeuille? Contactez notre support technique au 0549819905',
+ 
 
   // Messages
   'nouveau_message': 'Nouveau message',
@@ -81,6 +125,11 @@ final Map<String, String> fr = {
   'toutes_notifications': 'Toutes les notifications',
   'aucune_notification': 'Aucune notification',
   'marquer_tout_lu': 'Marquer tout comme lu',
+  'Tous les messages': 'Tous les messages',
+  'Contrat': 'Contrat',
+  'Gérez les notifications': 'Gérez les notifications', 
+  'Choisissez quelles notifications vous souhaitez recevoir..': 'Choisissez quelles notifications vous souhaitez recevoir',
+
 
   // Sécurité et confidentialité
   'securite_confidentialite': 'Sécurité et confidentialité',
@@ -96,6 +145,32 @@ final Map<String, String> fr = {
   'tout_le_monde': 'Tout le monde',
   'amis_seulement': 'Amis seulement',
   'personne': 'Personne',
+  'Points à améliorer': 'Points à améliorer',
+  'Actions de sécurité': 'Actions de sécurité',
+  'Paramètres de confidentialité':'Paramètres de confidentialité',
+  'Recevoir une alerte lors d\'une nouvelle connexion': 'Recevoir une alerte lors d\'une nouvelle connexion',
+  'Masquer votre statut en ligne': 'Masquer votre statut en ligne',
+  'Conseil de sécurité': 'Conseil de sécurité',
+  'Utilisez un gestionnaire de mots de passe pour créer et stocker des mots de passe forts et uniques pour chacun de vos comptes.': 'Utilisez un gestionnaire de mots de passe pour créer et stocker des mots de passe forts et uniques pour chacun de vos comptes.',
+'Changer le mot de passe': 'Changer le mot de passe',
+'Authentification à deux facteurs': 'Authentification à deux facteurs',
+'Authentification à deux facteurs désactivée': 'Authentification à deux facteurs désactivée',
+'Activée': 'Activée',
+'Non activée': 'Non activée',
+'Vérification des appareils connectés': 'Vérification des appareils connectés',
+'Historique des connexions': 'Historique des connexions',
+'Paramètres de confidentialité': 'Paramètres de confidentialité',
+'Notifications de connexion': 'Notifications de connexion',
+'Recevoir une alerte lors d\'une nouvelle connexion': 'Recevoir une alerte lors d\'une nouvelle connexion',
+'mise a jour de mode prive avec success': 'mise a jour de mode prive avec success',
+"Erreur dans la modification de status": "Erreur dans la modification de status",
+'Sécurité & Confidentialité': 'Sécurité & Confidentialité',
+"Pas de risque": "Pas de risque",
+'Moyen': 'Moyen',
+"Élevé": "Élevé",
+'Changer': 'Changer',
+
+
 
   // Abonnement
   'abonnement': 'Abonnement',
@@ -110,6 +185,13 @@ final Map<String, String> fr = {
   'methode_paiement': 'Méthode de paiement',
   'details_abonnement': 'Détails de l\'abonnement',
   'expire_le': 'Expire le',
+  'Aucun abonnement': 'Aucun abonnement',
+  'Gérez vos abonnements': 'Gérez vos abonnements',
+  "Choisissez votre plan d'abonnement mensuel pour accéder à toutes les fonctionnalités.": "Choisissez votre plan d'abonnement mensuel pour accéder à toutes les fonctionnalités.",
+"Forfaits disponibles": "Forfaits disponibles",
+"Finalisation de votre abonnement...": "Finalisation de votre abonnement...",
+"Erreur: ID de paiement manquant": "Erreur: ID de paiement manquant",
+
 
   // FAQ et Aide
   'faq': 'FAQ',
@@ -118,6 +200,7 @@ final Map<String, String> fr = {
   'questions_frequentes': 'Questions fréquentes',
   'comment_utiliser': 'Comment utiliser',
   'depannage': 'Dépannage',
+  'Assistance': 'Assistance',
 
   // Langue
   'langue': 'Langue',
@@ -155,6 +238,7 @@ final Map<String, String> fr = {
   'termine': 'Terminé',
   'annule': 'Annulé',
   'en_attente': 'En attente',
+  'Tous les contrats': 'Tous les contrats',
 
   // Entreprise
   'entreprise': 'Entreprise',
@@ -185,6 +269,11 @@ final Map<String, String> fr = {
   'moyenne': 'Moyenne',
   'graphique': 'Graphique',
   'donnees': 'Données',
+  'Vue d\'ensemble': 'Vue d\'ensemble',
+  'Statistiques de votre compte': 'Statistiques de votre compte',
+  'Score de Sécurité': 'Score de Sécurité',
+  'Activités Récentes': 'Activités Récentes',
+  'Distribution des Contrats': 'Distribution des Contrats',
 
   // Temps et Date
   'aujourd_hui': 'Aujourd\'hui',
@@ -207,6 +296,19 @@ final Map<String, String> fr = {
   'erreur_connexion': 'Erreur de connexion',
   'non_trouve': 'Non trouvé',
 
+  // Theme
+  'Thème': 'Thème',
+  'clair': 'Clair',
+  'sombre': 'Sombre',
+  'Mode sombre': ' Mode sombre',
+  'Mode clair': 'Mode clair',
+  'Aperçu': 'Aperçu',
+  'Sélectionnez votre thème préféré': 'Sélectonner votre thème préféré',
+  'Exemple de texte de sous-titre': 'Exemple de texte de sous-titre',
+  'Basculer entre le mode clair et sombre': 'Basculer entre le mode clair et sombre',
+
+
+
   // Divers
   'bienvenue': 'Bienvenue',
   'bon_retour': 'Bon retour',
@@ -214,6 +316,8 @@ final Map<String, String> fr = {
   'en_savoir_plus': 'En savoir plus',
   'voir_tout': 'Voir tout',
   'afficher_plus': 'Afficher plus',
+  'Accepter': 'Accepter',
+
 
   'bienvenue': 'bienvenue',
   'bon_retour': 'bon retour',
@@ -233,6 +337,8 @@ final Map<String, String> fr = {
   'Aide': 'Aide',
   'Fermer': 'Fermer',
   'Compte': 'Compte',
+  'Accueil': 'Accueil',
+  'Explorer': 'Explorer',
   'Modifier le profil': 'Modifier le profil',
   'Notifications': 'Notifications',
   'Confidentialité': 'Confidentialité',
@@ -316,10 +422,13 @@ final Map<String, String> fr = {
   'Ahmini est une application qui permet aux freelances de trouver des entreprises pour offrir leurs services, et permet aux entreprises de trouver des freelances capables de répondre à leurs besoins, tout en sécurisant les transactions grâce à un contrat signé par les deux parties.': 'Ahmini est une application qui permet aux freelances de trouver des entreprises pour offrir leurs services, et permet aux entreprises de trouver des freelances capables de répondre à leurs besoins, tout en sécurisant les transactions grâce à un contrat signé par les deux parties.',
   'Comment procéder au paiement ?': 'Comment procéder au paiement ?',
   'Comment être sûr que l\'entreprise me paiera ?': 'Comment être sûr que l\'entreprise me paiera ?',
-  'Grâce à un contrat signé par l\'entreprise et le freelance.': 'Grâce à un contrat signé par l\'entreprise et le freelance.',
-  'Comment être sûr que le freelance accomplira le travail demandé ?': 'Comment être sûr que le freelance accomplira le travail demandé ?',
-  'Comment puis-je demander au freelance le prix du service ?': 'Comment puis-je demander au freelance le prix du service ?',
-  'En expliquant le travail demandé à ce freelance via le chat, et il pourra proposer un prix.': 'En expliquant le travail demandé à ce freelance via le chat, et il pourra proposer un prix.',
+  'Grâce à un contrat signé par l\'entreprise et le freelancer.': 'Grâce à un contrat signé par l\'entreprise et le freelancer.',
+  "Via compte - abonnements, choisir l'abonnement qui vous convient et procédez au paiement en toute sécurité": "Via compte - abonnements, choisir l'abonnement qui vous convient et procédez au paiement en toute sécurité",
+  "Ahmini est une application qui permet aux freelances de trouver des entreprises pour offrir leurs services, et permet aux entreprises de trouver des freelances capables de répondre à leurs besoins, tout en sécurisant les transactions grâce à un contrat signé par les deux parties.": 'Ahmini est une application qui permet aux freelances de trouver des entreprises pour offrir leurs services, et permet aux entreprises de trouver des freelances capables de répondre à leurs besoins, tout en sécurisant les transactions grâce à un contrat signé par les deux parties.',
+
+  'Comment être sûr que le freelancer accomplira le travail demandé ?': 'Comment être sûr que le freelancer accomplira le travail demandé ?',
+  'Comment puis-je demander au freelancer le prix du service ?': 'Comment puis-je demander au freelancer le prix du service ?',
+  'En expliquant le travail demandé à ce freelancer via le chat, et il pourra proposer un prix.': 'En expliquant le travail demandé à ce freelancer via le chat, et il pourra proposer un prix.',
   'Toujours bloqué ? Nous sommes à un mail près': 'Toujours bloqué ? Nous sommes à un mail près',
   'Envoyer un message': 'Envoyer un message',
 

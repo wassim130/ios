@@ -1,28 +1,23 @@
-import 'dart:convert';
-
-import 'package:ahmini/models/freelancer.dart';
-import 'package:ahmini/services/constants.dart';
 import 'package:ahmini/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
 
-import '../../controllers/app_controller.dart';
 import '../../controllers/theme_controller.dart';
 import '../../models/user.dart';
 import 'components/entreprise_list.dart';
 import 'components/filters.dart';
 import 'components/freelancer_list.dart';
+import 'components/search_bar.dart';
 // import 'package:google_fonts/google_fonts.dart';
+
 
 class ExploreScreen extends StatefulWidget {
   final bool? isLoggedIn;
-  final GlobalKey? parentKey;
+  final UserModel? user;
   const ExploreScreen({
     super.key,
     this.isLoggedIn,
-    this.parentKey,
+    this.user,
   });
 
   @override
@@ -32,22 +27,19 @@ class ExploreScreen extends StatefulWidget {
 class _ExploreScreenState extends State<ExploreScreen> {
   final PageController _pageController = PageController();
   bool isEnterpriseActive = true;
-  bool isSearchFocused = false;
   final TextEditingController searchController = TextEditingController();
   UserModel? user;
   GlobalKey<EntrepriseListState> entrepriseKey =
-  GlobalKey<EntrepriseListState>();
+      GlobalKey<EntrepriseListState>();
   GlobalKey<FreelancerListState> freelancerKey =
-  GlobalKey<FreelancerListState>();
+      GlobalKey<FreelancerListState>();
   final ThemeController themeController = Get.find<ThemeController>();
-
 
   @override
   void initState() {
+    user = widget.user;
     super.initState();
-    user = Get.find<AppController>().user;
   }
-
 
   @override
   void dispose() {
@@ -62,7 +54,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
       final isDark = themeController.isDarkMode.value;
       final primaryColorTheme = isDark ? darkPrimaryColor : primaryColor;
       final secondaryColorTheme = isDark ? darkSecondaryColor : secondaryColor;
-      final backgroundColorTheme = isDark ? darkBackgroundColor : backgroundColor;
+      final backgroundColorTheme =
+          isDark ? darkBackgroundColor : backgroundColor;
 
       return Scaffold(
         backgroundColor: backgroundColorTheme,
@@ -107,96 +100,61 @@ class _ExploreScreenState extends State<ExploreScreen> {
           //     onPressed: () {},
           //   ),
           // ],
+          
         ),
         body: Column(
           children: [
-            AnimatedContainer(
-              duration: Duration(milliseconds: 200),
-              width: MediaQuery.of(context).size.width * 0.75,
-              decoration: BoxDecoration(
-                color: isDark ? darkSecondaryColor.withOpacity(0.3) : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: isSearchFocused
-                    ? [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: Offset(0, 3),
-                  ),
-                ]
-                    : [],
+            if (user != null)
+            SizedBox(height: 10,),
+              ExploreSearchBar(
+                searchController: searchController,
+                listKey: user!.isEnterprise ? freelancerKey : entrepriseKey,
+                isEntreprise: user!.isEnterprise,
+                isDark: isDark,
               ),
-              child: TextField(
-                controller: searchController,
-                onTap: () => setState(() => isSearchFocused = true),
-                onSubmitted: (_) => setState(() => isSearchFocused = false),
-                decoration: InputDecoration(
-                  hintText: 'Rechercher un profil...'.tr,
-                  hintStyle: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
-                  prefixIcon: Icon(
-                      Icons.search,
-                      color: primaryColorTheme
-                  ),
-                  suffixIcon: searchController.text.isNotEmpty
-                      ? IconButton(
-                    icon: Icon(
-                      Icons.clear,
-                      color: isDark ? Colors.white70 : Colors.black54,
-                    ),
-                    onPressed: () => searchController.clear(),
-                  )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                ),
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-              ),
-            ),
-            // Tabs Section
+              // Tabs Section
             // _buildTabBar(context),
 
-            // Suggestions Section
-            if (searchController.text.isNotEmpty)
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                color: isDark ? darkSecondaryColor.withOpacity(0.2) : Colors.grey.shade50,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Suggestions populaires:'.tr,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.grey.shade700,
-                      ),
-                    ),
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        _buildSuggestionChip('React Developer'.tr, isDark, primaryColorTheme),
-                        _buildSuggestionChip('UI Designer'.tr, isDark, primaryColorTheme),
-                        _buildSuggestionChip('Full Stack'.tr, isDark, primaryColorTheme),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
+            // // Suggestions Section
+            //TODO : IF WE HAVE EXTRA TIME DO THIS
+            // if (searchController.text.isNotEmpty)
+            //   Container(
+            //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            //     color: isDark ? darkSecondaryColor.withOpacity(0.2) : Colors.grey.shade50,
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         Text(
+            //           'Suggestions populaires:'.tr,
+            //           style: TextStyle(
+            //             fontWeight: FontWeight.bold,
+            //             color: isDark ? Colors.white : Colors.grey.shade700,
+            //           ),
+            //         ),
+            //         Wrap(
+            //           spacing: 8,
+            //           children: [
+            //             _buildSuggestionChip('React Developer'.tr, isDark, primaryColorTheme),
+            //             _buildSuggestionChip('UI Designer'.tr, isDark, primaryColorTheme),
+            //             _buildSuggestionChip('Full Stack'.tr, isDark, primaryColorTheme),
+            //           ],
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            
             // Filters Section
-            Filter(
-              listKey: user!.isEnterprise ? freelancerKey : entrepriseKey,
-              isEnterprise: user!.isEnterprise,
-            ),
+            if (user != null)
+              Filter(
+                listKey: user!.isEnterprise ? freelancerKey : entrepriseKey,
+                isEnterprise: user!.isEnterprise,
+              ),
             // _buildQuickFilterChip("test123", Icons.tab),
+            // _buildSuggestionChip("test", isDark, primaryColorTheme),
             if (user != null)
               Expanded(
                 child: user!.isEnterprise
-                    ? FreeLancerList(key:freelancerKey)
+                    ? FreeLancerList(key: freelancerKey)
                     : EntrepriseList(key: entrepriseKey),
               ),
           ],
@@ -205,7 +163,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
     });
   }
 
-  Widget _buildSuggestionChip(String label, bool isDark, Color primaryColorTheme) {
+  Widget _buildSuggestionChip(
+      String label, bool isDark, Color primaryColorTheme) {
     return ActionChip(
       label: Text(
         label,
@@ -217,7 +176,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
         searchController.text = label;
       },
       backgroundColor: isDark ? darkSecondaryColor : Colors.white,
-      side: BorderSide(color: isDark ? darkPrimaryColor.withOpacity(0.3) : Colors.grey.shade300),
+      side: BorderSide(
+          color: isDark
+              ? darkPrimaryColor.withOpacity(0.3)
+              : Colors.grey.shade300),
     );
   }
 
@@ -246,9 +208,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
       backgroundColor: isDark ? darkSecondaryColor : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: isDark ? darkPrimaryColor.withOpacity(0.3) : Colors.grey.shade300),
+        side: BorderSide(
+            color: isDark
+                ? darkPrimaryColor.withOpacity(0.3)
+                : Colors.grey.shade300),
       ),
     );
   }
 }
-

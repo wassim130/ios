@@ -1,4 +1,3 @@
-// twoverificationscreen.dart
 import 'package:ahmini/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,6 +23,7 @@ class _TwoFactorVerificationScreenState
     extends State<TwoFactorVerificationScreen> {
   final _codeController = TextEditingController();
   String? _errorMessage;
+  bool _isResending = false;
   final ThemeController themeController = Get.find<ThemeController>();
 
   @override
@@ -68,6 +68,51 @@ class _TwoFactorVerificationScreenState
     } catch (e) {
       if (mounted) {
         Navigator.pop(context); // Close loading indicator
+        myCustomDialog(context, {
+          'type': 'Error'.tr,
+          'message': 'Une erreur s\'est produite. Veuillez réessayer.'.tr,
+        });
+      }
+    }
+  }
+
+  Future<void> _resendCode() async {
+    if (_isResending) return;
+
+    setState(() {
+      _isResending = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final result = await AuthService.resendTwoFactor(
+        widget.twoFactorId.toString(),
+      );
+
+      if (mounted) {
+        setState(() {
+          _isResending = false;
+        });
+
+        if (result['status'] == 'success') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Nouveau code envoyé'.tr),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          setState(() {
+            _errorMessage = result['message'] ?? 'Erreur lors de l\'envoi du code';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isResending = false;
+        });
+
         myCustomDialog(context, {
           'type': 'Error'.tr,
           'message': 'Une erreur s\'est produite. Veuillez réessayer.'.tr,
@@ -159,15 +204,29 @@ class _TwoFactorVerificationScreenState
               ),
               SizedBox(height: 20),
               TextButton(
-                onPressed: () {
-                  // TODO: Implement resend code functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Nouveau code envoyé'.tr),
+                onPressed: _isResending ? null : _resendCode,
+                child: _isResending
+                    ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: primaryColorTheme,
+                      ),
                     ),
-                  );
-                },
-                child: Text(
+                    SizedBox(width: 8),
+                    Text(
+                      'Envoi en cours...'.tr,
+                      style: TextStyle(
+                        color: primaryColorTheme.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
+                )
+                    : Text(
                   'Renvoyer le code'.tr,
                   style: TextStyle(
                     color: primaryColorTheme,

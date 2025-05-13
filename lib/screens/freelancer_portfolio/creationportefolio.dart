@@ -19,7 +19,8 @@ class PortfolioOnboardingPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<PortfolioOnboardingPage> createState() => _PortfolioOnboardingPageState();
+  State<PortfolioOnboardingPage> createState() =>
+      _PortfolioOnboardingPageState();
 }
 
 class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
@@ -57,27 +58,32 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
   final List<Map<String, dynamic>> steps = [
     {
       'title': 'Bienvenue sur votre portfolio',
-      'description': 'Créez votre portfolio professionnel pour vous démarquer auprès des clients potentiels.',
+      'description':
+          'Créez votre portfolio professionnel pour vous démarquer auprès des clients potentiels.',
       'icon': Icons.person_outline,
     },
     {
       'title': 'Informations personnelles',
-      'description': 'Ajoutez vos informations de base pour que les clients puissent vous connaître.',
+      'description':
+          'Ajoutez vos informations de base pour que les clients puissent vous connaître.',
       'icon': Icons.info_outline,
     },
     {
       'title': 'Expérience professionnelle',
-      'description': 'Partagez votre parcours et vos compétences pour attirer les bons projets.',
+      'description':
+          'Partagez votre parcours et vos compétences pour attirer les bons projets.',
       'icon': Icons.work_outline,
     },
     {
       'title': 'Coordonnées',
-      'description': 'Ajoutez vos coordonnées pour que les clients puissent vous contacter facilement.',
+      'description':
+          'Ajoutez vos coordonnées pour que les clients puissent vous contacter facilement.',
       'icon': Icons.contact_mail_outlined,
     },
     {
       'title': 'Projets',
-      'description': 'Ajoutez vos projets pour montrer votre expertise et votre expérience.',
+      'description':
+          'Ajoutez vos projets pour montrer votre expertise et votre expérience.',
       'icon': Icons.folder_outlined,
     },
   ];
@@ -100,14 +106,21 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
 
     // Initialize controllers for text fields
     controllers['name'] = TextEditingController(text: portfolioData['name']);
-    controllers['username'] = TextEditingController(text: portfolioData['username']);
-    controllers['aboutWorkExperience'] = TextEditingController(text: portfolioData['aboutWorkExperience']);
-    controllers['aboutMeSummary'] = TextEditingController(text: portfolioData['aboutMeSummary']);
-    controllers['location'] = TextEditingController(text: portfolioData['location']);
-    controllers['website'] = TextEditingController(text: portfolioData['website']);
-    controllers['portfolio'] = TextEditingController(text: portfolioData['portfolio']);
+    controllers['username'] =
+        TextEditingController(text: portfolioData['username']);
+    controllers['aboutWorkExperience'] =
+        TextEditingController(text: portfolioData['aboutWorkExperience']);
+    controllers['aboutMeSummary'] =
+        TextEditingController(text: portfolioData['aboutMeSummary']);
+    controllers['location'] =
+        TextEditingController(text: portfolioData['location']);
+    controllers['website'] =
+        TextEditingController(text: portfolioData['website']);
+    controllers['portfolio'] =
+        TextEditingController(text: portfolioData['portfolio']);
     controllers['email'] = TextEditingController(text: portfolioData['email']);
-    controllers['contactEmail'] = TextEditingController(text: portfolioData['contactEmail']);
+    controllers['contactEmail'] =
+        TextEditingController(text: portfolioData['contactEmail']);
   }
 
   Future<void> savePortfolioData() async {
@@ -165,7 +178,6 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
       }
       Map<String, dynamic> portfolioDataToSend = Map.from(portfolioData);
 
-
 // If you have projects with image files, create a clean version for JSON
       if (portfolioDataToSend['projects'] != null) {
         List<Map<String, dynamic>> cleanProjects = [];
@@ -191,10 +203,13 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
         );
 
         // Navigate to home page
-        Navigator.pushReplacementNamed(context, '/', arguments: {'newUser': true});
+        Navigator.pushReplacementNamed(context, '/',
+            arguments: {'newUser': true});
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de la création: ${response.statusCode}')),
+          SnackBar(
+              content:
+                  Text('Erreur lors de la création: ${response.statusCode}')),
         );
       }
     } catch (e) {
@@ -281,7 +296,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
       final isDark = themeController.isDarkMode.value;
       final primaryColorTheme = isDark ? darkPrimaryColor : primaryColor;
       final secondaryColorTheme = isDark ? darkSecondaryColor : secondaryColor;
-      final backgroundColorTheme = isDark ? darkBackgroundColor : backgroundColor;
+      final backgroundColorTheme =
+          isDark ? darkBackgroundColor : backgroundColor;
 
       return Scaffold(
         backgroundColor: primaryColorTheme,
@@ -300,124 +316,134 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
         body: _isLoading
             ? Center(child: CircularProgressIndicator(color: Colors.white))
             : Column(
-          children: [
-            // Progress indicator
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: LinearProgressIndicator(
-                value: (_currentStep + 1) / steps.length,
-                backgroundColor: Colors.white.withOpacity(0.3),
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                minHeight: 5,
-              ),
-            ),
-
-            // Step indicator
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(steps[_currentStep]['icon'], color: Colors.white, size: 24),
-                  SizedBox(width: 10),
-                  Text(
-                    steps[_currentStep]['title'],
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  // Progress indicator
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: LinearProgressIndicator(
+                      value: (_currentStep + 1) / steps.length,
+                      backgroundColor: Colors.white.withOpacity(0.3),
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      minHeight: 5,
                     ),
                   ),
-                ],
-              ),
-            ),
 
-            // Description
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text(
-                steps[_currentStep]['description'],
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 16,
-                ),
-              ),
-            ),
-
-            SizedBox(height: 20),
-
-            // Main content
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: backgroundColorTheme,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                ),
-                child: PageView(
-                  controller: _pageController,
-                  physics: NeverScrollableScrollPhysics(),
-                  children: [
-                    _buildWelcomeStep(primaryColorTheme, secondaryColorTheme, isDark),
-                    _buildPersonalInfoStep(primaryColorTheme, secondaryColorTheme, isDark),
-                    _buildExperienceStep(primaryColorTheme, secondaryColorTheme, isDark),
-                    _buildContactStep(primaryColorTheme, secondaryColorTheme, isDark),
-                    _buildProjectsStep(primaryColorTheme, secondaryColorTheme, isDark),
-                  ],
-                ),
-              ),
-            ),
-
-            // Navigation buttons
-            Container(
-              color: backgroundColorTheme,
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (_currentStep > 0)
-                    TextButton(
-                      onPressed: _previousStep,
-                      child: Text(
-                        'Précédent',
-                        style: TextStyle(
-                          color: primaryColorTheme,
-                          fontSize: 16,
+                  // Step indicator
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(steps[_currentStep]['icon'],
+                            color: Colors.white, size: 24),
+                        SizedBox(width: 10),
+                        Text(
+                          steps[_currentStep]['title'],
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    )
-                  else
-                    SizedBox(width: 80),
-                  ElevatedButton(
-                    onPressed: _nextStep,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColorTheme,
-                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                      ],
                     ),
+                  ),
+
+                  // Description
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Text(
-                      _currentStep == steps.length - 1 ? 'Terminer' : 'Suivant',
+                      steps[_currentStep]['description'],
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.white.withOpacity(0.8),
                         fontSize: 16,
                       ),
                     ),
                   ),
+
+                  SizedBox(height: 20),
+
+                  // Main content
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: backgroundColorTheme,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                      ),
+                      child: PageView(
+                        controller: _pageController,
+                        physics: NeverScrollableScrollPhysics(),
+                        children: [
+                          _buildWelcomeStep(
+                              primaryColorTheme, secondaryColorTheme, isDark),
+                          _buildPersonalInfoStep(
+                              primaryColorTheme, secondaryColorTheme, isDark),
+                          _buildExperienceStep(
+                              primaryColorTheme, secondaryColorTheme, isDark),
+                          _buildContactStep(
+                              primaryColorTheme, secondaryColorTheme, isDark),
+                          _buildProjectsStep(
+                              primaryColorTheme, secondaryColorTheme, isDark),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Navigation buttons
+                  Container(
+                    color: backgroundColorTheme,
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (_currentStep > 0)
+                          TextButton(
+                            onPressed: _previousStep,
+                            child: Text(
+                              'Précédent',
+                              style: TextStyle(
+                                color: primaryColorTheme,
+                                fontSize: 16,
+                              ),
+                            ),
+                          )
+                        else
+                          SizedBox(width: 80),
+                        ElevatedButton(
+                          onPressed: _nextStep,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColorTheme,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: Text(
+                            _currentStep == steps.length - 1
+                                ? 'Terminer'
+                                : 'Suivant',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ],
-        ),
       );
     });
   }
 
-  Widget _buildWelcomeStep(Color primaryColor, Color secondaryColor, bool isDark) {
+  Widget _buildWelcomeStep(
+      Color primaryColor, Color secondaryColor, bool isDark) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -440,21 +466,21 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
                   ),
                   child: profileImageFile != null
                       ? ClipOval(
-                    child: Image.file(
-                      profileImageFile!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.person,
-                        size: 60,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  )
+                          child: Image.file(
+                            profileImageFile!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        )
                       : Icon(
-                    Icons.person,
-                    size: 60,
-                    color: Colors.grey,
-                  ),
+                          Icons.person,
+                          size: 60,
+                          color: Colors.grey,
+                        ),
                 ),
               ),
               Positioned(
@@ -544,7 +570,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
     );
   }
 
-  Widget _buildPersonalInfoStep(Color primaryColor, Color secondaryColor, bool isDark) {
+  Widget _buildPersonalInfoStep(
+      Color primaryColor, Color secondaryColor, bool isDark) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -614,7 +641,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
     );
   }
 
-  Widget _buildExperienceStep(Color primaryColor, Color secondaryColor, bool isDark) {
+  Widget _buildExperienceStep(
+      Color primaryColor, Color secondaryColor, bool isDark) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -636,7 +664,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
             maxLines: 6,
             decoration: InputDecoration(
               labelText: 'Expérience professionnelle',
-              hintText: 'Décrivez votre parcours, vos compétences et votre expertise...',
+              hintText:
+                  'Décrivez votre parcours, vos compétences et votre expertise...',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
@@ -736,7 +765,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
     );
   }
 
-  Widget _buildContactStep(Color primaryColor, Color secondaryColor, bool isDark) {
+  Widget _buildContactStep(
+      Color primaryColor, Color secondaryColor, bool isDark) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -869,7 +899,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
     );
   }
 
-  Widget _buildProjectsStep(Color primaryColor, Color secondaryColor, bool isDark) {
+  Widget _buildProjectsStep(
+      Color primaryColor, Color secondaryColor, bool isDark) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -896,7 +927,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                onPressed: () => _showAddProjectDialog(context, primaryColor, secondaryColor, isDark),
+                onPressed: () => _showAddProjectDialog(
+                    context, primaryColor, secondaryColor, isDark),
               ),
             ],
           ),
@@ -904,48 +936,49 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
           SizedBox(height: 20),
 
           // Projects list
-          portfolioData['projects'] == null || (portfolioData['projects'] as List).isEmpty
+          portfolioData['projects'] == null ||
+                  (portfolioData['projects'] as List).isEmpty
               ? Center(
-            child: Column(
-              children: [
-                Icon(
-                  Icons.folder_outlined,
-                  size: 60,
-                  color: Colors.grey,
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Aucun projet pour le moment',
-                  style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black54,
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.folder_outlined,
+                        size: 60,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Aucun projet pour le moment',
+                        style: TextStyle(
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Ajoutez vos projets pour montrer votre expertise',
+                        style: TextStyle(
+                          color: isDark ? Colors.white54 : Colors.black38,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Ajoutez vos projets pour montrer votre expertise',
-                  style: TextStyle(
-                    color: isDark ? Colors.white54 : Colors.black38,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          )
+                )
               : ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: (portfolioData['projects'] as List).length,
-            itemBuilder: (context, index) {
-              final project = (portfolioData['projects'] as List)[index];
-              return _buildProjectItem(
-                project,
-                index,
-                primaryColor,
-                secondaryColor,
-                isDark,
-              );
-            },
-          ),
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: (portfolioData['projects'] as List).length,
+                  itemBuilder: (context, index) {
+                    final project = (portfolioData['projects'] as List)[index];
+                    return _buildProjectItem(
+                      project,
+                      index,
+                      primaryColor,
+                      secondaryColor,
+                      isDark,
+                    );
+                  },
+                ),
 
           SizedBox(height: 30),
 
@@ -989,12 +1022,12 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
   }
 
   Widget _buildProjectItem(
-      Map<String, dynamic> project,
-      int index,
-      Color primaryColor,
-      Color secondaryColor,
-      bool isDark,
-      ) {
+    Map<String, dynamic> project,
+    int index,
+    Color primaryColor,
+    Color secondaryColor,
+    bool isDark,
+  ) {
     return Container(
       margin: EdgeInsets.only(bottom: 15),
       decoration: BoxDecoration(
@@ -1018,18 +1051,19 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
               children: [
                 project['imageFile'] != null
                     ? Image.file(
-                  project['imageFile'],
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                )
+                        project['imageFile'],
+                        height: 150,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      )
                     : Container(
-                  height: 150,
-                  color: Colors.grey.withOpacity(0.3),
-                  child: Center(
-                    child: Icon(Icons.image, size: 40, color: Colors.grey),
-                  ),
-                ),
+                        height: 150,
+                        color: Colors.grey.withOpacity(0.3),
+                        child: Center(
+                          child:
+                              Icon(Icons.image, size: 40, color: Colors.grey),
+                        ),
+                      ),
                 Positioned(
                   top: 10,
                   right: 10,
@@ -1043,7 +1077,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
                             color: Colors.white.withOpacity(0.8),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.edit, size: 20, color: primaryColor),
+                          child:
+                              Icon(Icons.edit, size: 20, color: primaryColor),
                         ),
                       ),
                       SizedBox(width: 10),
@@ -1055,7 +1090,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
                             color: Colors.white.withOpacity(0.8),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.delete, size: 20, color: Colors.red),
+                          child:
+                              Icon(Icons.delete, size: 20, color: Colors.red),
                         ),
                       ),
                     ],
@@ -1091,15 +1127,21 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: (project['technologies'] as List<dynamic>?)?.map((tech) => Chip(
-                    label: Text(
-                      tech.toString(),
-                      style: TextStyle(fontSize: 12, color: Colors.white),
-                    ),
-                    backgroundColor: primaryColor,
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  )).toList() ?? [],
+                  children: (project['technologies'] as List<dynamic>?)
+                          ?.map((tech) => Chip(
+                                label: Text(
+                                  tech.toString(),
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.white),
+                                ),
+                                backgroundColor: primaryColor,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 0),
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                              ))
+                          .toList() ??
+                      [],
                 ),
                 SizedBox(height: 10),
                 Align(
@@ -1159,7 +1201,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
     }
   }
 
-  void _showAddProjectDialog(BuildContext context, Color primaryColor, Color secondaryColor, bool isDark) {
+  void _showAddProjectDialog(BuildContext context, Color primaryColor,
+      Color secondaryColor, bool isDark) {
     TextEditingController titleController = TextEditingController();
     TextEditingController descController = TextEditingController();
     TextEditingController techController = TextEditingController();
@@ -1168,157 +1211,163 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                title: Text('Ajouter un projet'),
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Project image
-                      GestureDetector(
-                        onTap: () async {
-                          FilePickerResult? result = await FilePicker.platform.pickFiles(
-                            type: FileType.image,
-                          );
-
-                          if (result != null && result.files.single.path != null) {
-                            setState(() {
-                              projectImageFile = File(result.files.single.path!);
-                            });
-                          }
-                        },
-                        child: Container(
-                          height: 120,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: primaryColor.withOpacity(0.5)),
-                          ),
-                          child: projectImageFile != null
-                              ? ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.file(
-                              projectImageFile!,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                              : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.add_photo_alternate, size: 40, color: primaryColor),
-                              SizedBox(height: 8),
-                              Text(
-                                'Ajouter une image',
-                                style: TextStyle(color: primaryColor),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 15),
-                      TextField(
-                        controller: titleController,
-                        decoration: InputDecoration(
-                          labelText: 'Titre',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: descController,
-                        maxLines: 3,
-                        decoration: InputDecoration(
-                          labelText: 'Description',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: techController,
-                        decoration: InputDecoration(
-                          labelText: 'Technologies (séparées par des virgules)',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Annuler',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.add, color: Colors.white),
-                    label: Text('Ajouter', style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                    ),
-                    onPressed: () {
-                      if (titleController.text.isEmpty || descController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Veuillez remplir tous les champs obligatoires')),
-                        );
-                        return;
-                      }
-
-                      List<String> technologies = techController.text
-                          .split(',')
-                          .map((e) => e.trim())
-                          .where((e) => e.isNotEmpty)
-                          .toList();
-
-              Map<String, dynamic> newProject = {
-              'title': titleController.text,
-              'description': descController.text,
-              'technologies': technologies,
-              // Don't include the File object in the JSON data
-              // Instead, just store a placeholder or temporary ID
-              'image': 'pending_upload',  // This will be replaced with the actual URL after upload
-              };
-
-              if (projectImageFile != null) {
-              projectsWithImageFiles.add({
-              'index': portfolioData['projects'].length,
-              'imageFile': projectImageFile,
-              });
-              }
-
-              portfolioData['projects'].add(newProject);
-
-                        // Add to our tracking list if there's an image
-                        if (projectImageFile != null) {
-                          projectsWithImageFiles.add({
-                            'index': portfolioData['projects'].length - 1,
-                            'imageFile': projectImageFile,
-                          });
-                        }
-
-
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Projet ajouté avec succès')),
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Ajouter un projet'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Project image
+                  GestureDetector(
+                    onTap: () async {
+                      FilePickerResult? result =
+                          await FilePicker.platform.pickFiles(
+                        type: FileType.image,
                       );
+
+                      if (result != null && result.files.single.path != null) {
+                        setState(() {
+                          projectImageFile = File(result.files.single.path!);
+                        });
+                      }
                     },
+                    child: Container(
+                      height: 120,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                        border:
+                            Border.all(color: primaryColor.withOpacity(0.5)),
+                      ),
+                      child: projectImageFile != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.file(
+                                projectImageFile!,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_photo_alternate,
+                                    size: 40, color: primaryColor),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Ajouter une image',
+                                  style: TextStyle(color: primaryColor),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                  SizedBox(height: 15),
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Titre',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: descController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: techController,
+                    decoration: InputDecoration(
+                      labelText: 'Technologies (séparées par des virgules)',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ],
-              );
-            }
-        );
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Annuler',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+              ElevatedButton.icon(
+                icon: Icon(Icons.add, color: Colors.white),
+                label: Text('Ajouter', style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                ),
+                onPressed: () {
+                  if (titleController.text.isEmpty ||
+                      descController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(
+                              'Veuillez remplir tous les champs obligatoires')),
+                    );
+                    return;
+                  }
+
+                  List<String> technologies = techController.text
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList();
+
+                  Map<String, dynamic> newProject = {
+                    'title': titleController.text,
+                    'description': descController.text,
+                    'technologies': technologies,
+                    // Don't include the File object in the JSON data
+                    // Instead, just store a placeholder or temporary ID
+                    'image':
+                        'pending_upload', // This will be replaced with the actual URL after upload
+                  };
+
+                  if (projectImageFile != null) {
+                    projectsWithImageFiles.add({
+                      'index': portfolioData['projects'].length,
+                      'imageFile': projectImageFile,
+                    });
+                  }
+
+                  portfolioData['projects'].add(newProject);
+
+                  // Add to our tracking list if there's an image
+                  if (projectImageFile != null) {
+                    projectsWithImageFiles.add({
+                      'index': portfolioData['projects'].length - 1,
+                      'imageFile': projectImageFile,
+                    });
+                  }
+
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Projet ajouté avec succès')),
+                  );
+                },
+              ),
+            ],
+          );
+        });
       },
     );
   }
 
   void _editProject(int index) {
     Map<String, dynamic> project = portfolioData['projects'][index];
-    TextEditingController titleController = TextEditingController(text: project['title']);
-    TextEditingController descController = TextEditingController(text: project['description']);
+    TextEditingController titleController =
+        TextEditingController(text: project['title']);
+    TextEditingController descController =
+        TextEditingController(text: project['description']);
     TextEditingController techController = TextEditingController(
       text: (project['technologies'] as List<dynamic>).join(', '),
     );
@@ -1327,146 +1376,151 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                title: Text('Modifier le projet'),
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Project image
-                      GestureDetector(
-                        onTap: () async {
-                          FilePickerResult? result = await FilePicker.platform.pickFiles(
-                            type: FileType.image,
-                          );
-
-                          if (result != null && result.files.single.path != null) {
-                            setState(() {
-                              projectImageFile = File(result.files.single.path!);
-                            });
-                          }
-                        },
-                        child: Container(
-                          height: 120,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: primaryColor.withOpacity(0.5)),
-                          ),
-                          child: projectImageFile != null
-                              ? ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.file(
-                              projectImageFile!,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                              : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.add_photo_alternate, size: 40, color: primaryColor),
-                              SizedBox(height: 8),
-                              Text(
-                                'Modifier l\'image',
-                                style: TextStyle(color: primaryColor),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 15),
-                      TextField(
-                        controller: titleController,
-                        decoration: InputDecoration(
-                          labelText: 'Titre',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: descController,
-                        maxLines: 3,
-                        decoration: InputDecoration(
-                          labelText: 'Description',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: techController,
-                        decoration: InputDecoration(
-                          labelText: 'Technologies (séparées par des virgules)',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('Annuler'),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                    ),
-                    onPressed: () {
-                      if (titleController.text.isEmpty || descController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Veuillez remplir tous les champs obligatoires')),
-                        );
-                        return;
-                      }
-
-                      List<String> technologies = techController.text
-                          .split(',')
-                          .map((e) => e.trim())
-                          .where((e) => e.isNotEmpty)
-                          .toList();
-
-                      setState(() {
-                        portfolioData['projects'][index] = {
-                          'title': titleController.text,
-                          'description': descController.text,
-                          'technologies': technologies,
-                          'imageFile': projectImageFile,
-                        };
-
-                        // Update our tracking list if there's an image
-                        if (projectImageFile != null) {
-                          bool found = false;
-                          for (int i = 0; i < projectsWithImageFiles.length; i++) {
-                            if (projectsWithImageFiles[i]['index'] == index) {
-                              projectsWithImageFiles[i]['imageFile'] = projectImageFile;
-                              found = true;
-                              break;
-                            }
-                          }
-
-                          if (!found) {
-                            projectsWithImageFiles.add({
-                              'index': index,
-                              'imageFile': projectImageFile,
-                            });
-                          }
-                        }
-                      });
-
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Projet mis à jour avec succès')),
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Modifier le projet'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Project image
+                  GestureDetector(
+                    onTap: () async {
+                      FilePickerResult? result =
+                          await FilePicker.platform.pickFiles(
+                        type: FileType.image,
                       );
+
+                      if (result != null && result.files.single.path != null) {
+                        setState(() {
+                          projectImageFile = File(result.files.single.path!);
+                        });
+                      }
                     },
-                    child: Text('Mettre à jour'),
+                    child: Container(
+                      height: 120,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                        border:
+                            Border.all(color: primaryColor.withOpacity(0.5)),
+                      ),
+                      child: projectImageFile != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.file(
+                                projectImageFile!,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_photo_alternate,
+                                    size: 40, color: primaryColor),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Modifier l\'image',
+                                  style: TextStyle(color: primaryColor),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                  SizedBox(height: 15),
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Titre',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: descController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: techController,
+                    decoration: InputDecoration(
+                      labelText: 'Technologies (séparées par des virgules)',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ],
-              );
-            }
-        );
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Annuler'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                ),
+                onPressed: () {
+                  if (titleController.text.isEmpty ||
+                      descController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(
+                              'Veuillez remplir tous les champs obligatoires')),
+                    );
+                    return;
+                  }
+
+                  List<String> technologies = techController.text
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList();
+
+                  setState(() {
+                    portfolioData['projects'][index] = {
+                      'title': titleController.text,
+                      'description': descController.text,
+                      'technologies': technologies,
+                      'imageFile': projectImageFile,
+                    };
+
+                    // Update our tracking list if there's an image
+                    if (projectImageFile != null) {
+                      bool found = false;
+                      for (int i = 0; i < projectsWithImageFiles.length; i++) {
+                        if (projectsWithImageFiles[i]['index'] == index) {
+                          projectsWithImageFiles[i]['imageFile'] =
+                              projectImageFile;
+                          found = true;
+                          break;
+                        }
+                      }
+
+                      if (!found) {
+                        projectsWithImageFiles.add({
+                          'index': index,
+                          'imageFile': projectImageFile,
+                        });
+                      }
+                    }
+                  });
+
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Projet mis à jour avec succès')),
+                  );
+                },
+                child: Text('Mettre à jour'),
+              ),
+            ],
+          );
+        });
       },
     );
   }
@@ -1492,7 +1546,8 @@ class _PortfolioOnboardingPageState extends State<PortfolioOnboardingPage> {
                   portfolioData['projects'].removeAt(index);
 
                   // Remove from our tracking list
-                  projectsWithImageFiles.removeWhere((item) => item['index'] == index);
+                  projectsWithImageFiles
+                      .removeWhere((item) => item['index'] == index);
 
                   // Update indices for remaining projects
                   for (int i = 0; i < projectsWithImageFiles.length; i++) {

@@ -8,9 +8,11 @@ import '../../../../models/message.dart';
 import '../../../../services/websocket.dart';
 
 import '../../../../providers/chat_websocket.dart';
-import 'bottom_sheet.dart';
+import 'attachments/file.dart';
 import 'attachments/image.dart';
 import 'attachments/location.dart';
+import 'attachments/audio.dart';
+import 'bottom_sheet.dart';
 import 'sheet.dart';
 
 class MessageBubble extends StatefulWidget {
@@ -41,6 +43,12 @@ class _MessageBubbleState extends State<MessageBubble> {
 
   @override
   Widget build(BuildContext context) {
+    // Debug print to see message details
+    print("Building message bubble for message ID: ${widget.message.messageID}");
+    print("Attachment type: ${widget.message.attachmentType}");
+    print("Attachment URL: ${widget.message.attachmentUrl}");
+    print("Audio duration: ${widget.message.audioDuration}");
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: GestureDetector(
@@ -48,7 +56,7 @@ class _MessageBubbleState extends State<MessageBubble> {
             ? null
             : _showReactionPicker(widget.message),
         onLongPress: () =>
-            widget.message.deleted ? null : _showMessageOptions(widget.message),
+        widget.message.deleted ? null : _showMessageOptions(widget.message),
         child: Align(
           alignment: widget.message.mine
               ? Alignment.centerRight
@@ -115,7 +123,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                         : widget.message.content,
                     style: TextStyle(
                       color:
-                          widget.message.mine ? Colors.white : Colors.black87,
+                      widget.message.mine ? Colors.white : Colors.black87,
                     ),
                   ),
                 if (!widget.message.deleted &&
@@ -137,7 +145,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 4,
                     ),
                   ],
@@ -162,7 +170,7 @@ class _MessageBubbleState extends State<MessageBubble> {
           style: TextStyle(
             fontSize: 11,
             color: widget.message.mine
-                ? Colors.white.withValues(alpha: 0.7)
+                ? Colors.white.withOpacity(0.7)
                 : Colors.black54,
           ),
         ),
@@ -172,7 +180,7 @@ class _MessageBubbleState extends State<MessageBubble> {
             widget.message.isRead ? Icons.done_all : Icons.done,
             size: 14,
             color: widget.message.mine
-                ? Colors.white.withValues(alpha: 0.7)
+                ? Colors.white.withOpacity(0.7)
                 : Colors.black54,
           ),
         ],
@@ -279,15 +287,26 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   Widget _buildAttachment(MessagesModel message) {
+    print("Building attachment for type: ${message.attachmentType}");
+
     switch (message.attachmentType) {
       case AttachmentType.image:
         return ImageAttachment(message: message);
       case AttachmentType.location:
-        return LocationAttachement(
-          latitude: widget.message.location!.latitude,
-          longitude: widget.message.location!.longitude,
-        );
+        if (message.location != null) {
+          return LocationAttachement(
+            latitude: message.location!.latitude,
+            longitude: message.location!.longitude,
+          );
+        }
+        return Text("Location unavailable", style: TextStyle(color: Colors.red));
+      case AttachmentType.file:
+        return FileAttachment(message: message);
+      case AttachmentType.audio:
+        print("Rendering audio attachment with URL: ${message.attachmentUrl}");
+        return AudioAttachment(message: message);
       default:
+        print("Unknown attachment type: ${message.attachmentType}");
         return const SizedBox.shrink();
     }
   }

@@ -69,7 +69,7 @@ class _PortfolioPageState extends State<MPortfolioPage> {
       // Construire l'URL de l'API
       // Si widget.id est null, cela affichera le portfolio de l'utilisateur connecté
       // Si widget.id est fourni, cela affichera le portfolio de l'utilisateur spécifié
-      final String apiUrl = '$apiBaseUrl/portefolio/${widget.id == null ? "" : "?id=${widget.id}"}';
+      final String apiUrl = '$apiBaseUrl/portefolio/${widget.id == null ? "?id=0" : "?id=${widget.id}"}';
 
       final response = await http.get(
         Uri.parse(apiUrl),

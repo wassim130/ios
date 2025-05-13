@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../services/websocket.dart';
+import '../../../../services/audio_recorder.dart';
 
 import '../../../../models/message.dart';
 
@@ -16,7 +17,7 @@ class Sheet extends StatefulWidget {
   final TextEditingController messageController;
   final int conversationID;
   final Function(bool) onRecordingStateChanged;
-  final Function(dynamic, dynamic) onAttachmentStateChanged;
+  final Function onAttachmentStateChanged;
   final bool isEditing;
 
   const Sheet({
@@ -39,9 +40,11 @@ class SheetState extends State<Sheet> {
   bool _isAttachement = false;
   AttachmentType _attachmentType = AttachmentType.none;
   Position? _position;
-  String? image64Base;
-  String? imageName;
-  List<int> imageBytes = [];
+  String? file64Base;
+  String? fileName;
+  List<int> fileBytes = [];
+  String? _audioPath;
+  int? _audioDuration;
 
   int? messageUpdatingID;
 
@@ -101,22 +104,52 @@ class SheetState extends State<Sheet> {
     widget.onAttachmentStateChanged(_attachmentType, _position);
   }
 
+  Future<void> _getFile() async {
+    _attachmentType = AttachmentType.file;
+    _isAttachement = true;
+    XFile? file = await _picker.pickMedia();
+    _proccessFile(file);
+  }
+
   Future<void> _getImage(ImageSource source) async {
     _attachmentType = AttachmentType.image;
     _isAttachement = true;
     XFile? image = await _picker.pickImage(source: source);
+    _proccessFile(image);
+  }
 
-    if (image != null) {
-      File file = File(image.path);
-      imageBytes = await file.readAsBytes();
-      image64Base = base64Encode(imageBytes);
-      imageName = image.path.split('/'.tr).last;
+  Future<void> _proccessFile(XFile? file) async {
+    if (file != null) {
+      fileBytes = await file.readAsBytes();
+      file64Base = base64Encode(fileBytes);
+      print("bytes $file64Base");
+      fileName = file.path.split('/').last;
     } else {
       _attachmentType = AttachmentType.none;
       _isAttachement = false;
     }
     setState(() {});
-    widget.onAttachmentStateChanged(_attachmentType, imageBytes);
+    widget.onAttachmentStateChanged(_attachmentType, fileBytes, name: fileName);
+  }
+
+  void processAudioRecording(String path, int duration) {
+    setState(() {
+      _attachmentType = AttachmentType.audio;
+      _isAttachement = true;
+      _audioPath = path;
+      _audioDuration = duration;
+
+      // Read file and convert to base64
+      final file = File(path);
+      fileBytes = file.readAsBytesSync();
+      file64Base = base64Encode(fileBytes);
+      fileName = path.split('/').last;
+    });
+
+    widget.onAttachmentStateChanged(_attachmentType, fileBytes, name: fileName);
+
+    // Auto-send the audio message
+    _sendMessage();
   }
 
   void _showAttachmentOptions() {
@@ -137,9 +170,9 @@ class SheetState extends State<Sheet> {
               children: [
                 _buildAttachmentOption(Icons.image, 'Photo'.tr, Colors.purple,
                     function: () {
-                  Navigator.pop(context);
-                  _getImage(ImageSource.gallery);
-                }),
+                      Navigator.pop(context);
+                      _getImage(ImageSource.gallery);
+                    }),
                 _buildAttachmentOption(
                   Icons.location_on,
                   'Location'.tr,
@@ -152,7 +185,10 @@ class SheetState extends State<Sheet> {
                 _buildAttachmentOption(
                     Icons.contact_page, 'Contact'.tr, Colors.blue),
                 _buildAttachmentOption(
-                    Icons.file_copy, 'Document'.tr, Colors.orange),
+                    Icons.file_copy, 'Document'.tr, Colors.orange,
+                    function: () {
+                      _getFile();
+                    }),
               ],
             ),
           ],
@@ -198,7 +234,10 @@ class SheetState extends State<Sheet> {
       messageController.clear();
     } else {
       if ((_attachmentType == AttachmentType.location && _position != null) ||
-          (_attachmentType == AttachmentType.image && image64Base != null) ||
+          ((_attachmentType == AttachmentType.image ||
+              _attachmentType == AttachmentType.file ||
+              _attachmentType == AttachmentType.audio) &&
+              file64Base != null) ||
           !_isAttachement) {
         final MessagesModel message = MessagesModel(
           messageID: 10,
@@ -208,10 +247,11 @@ class SheetState extends State<Sheet> {
           mine: true,
           attachmentType: _attachmentType,
           timestamp: DateTime.now().toUtc(),
+          audioDuration: _audioDuration,
         );
 
         _webSocketService?.sendMessage(
-            widget.conversationID, message, image64Base, imageName);
+            widget.conversationID, message, file64Base, fileName);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -238,9 +278,11 @@ class SheetState extends State<Sheet> {
     _attachmentType = AttachmentType.none;
     messageUpdatingID = null;
     _position = null;
-    image64Base = null;
-    imageBytes = [];
-    imageName = null;
+    file64Base = null;
+    fileBytes = [];
+    fileName = null;
+    _audioPath = null;
+    _audioDuration = null;
     widget.onAttachmentStateChanged(_attachmentType, null);
   }
 
@@ -250,23 +292,23 @@ class SheetState extends State<Sheet> {
       children: [
         isEditing || _isAttachement
             ? IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () {
-                  setState(() {
-                    _removeAttachment();
-                  });
-                },
-              )
+          icon: Icon(Icons.close),
+          onPressed: () {
+            setState(() {
+              _removeAttachment();
+            });
+          },
+        )
             : IconButton(
-                icon: Icon(_showEmoji
-                    ? Icons.keyboard
-                    : Icons.emoji_emotions_outlined),
-                onPressed: () {
-                  setState(() {
-                    _showEmoji = !_showEmoji;
-                  });
-                },
-              ),
+          icon: Icon(_showEmoji
+              ? Icons.keyboard
+              : Icons.emoji_emotions_outlined),
+          onPressed: () {
+            setState(() {
+              _showEmoji = !_showEmoji;
+            });
+          },
+        ),
         Expanded(
           child: Column(
             children: [
@@ -303,7 +345,7 @@ class SheetState extends State<Sheet> {
                               _isTyping = value.isNotEmpty;
                             });
                           },
-                          decoration:  InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'Message...'.tr,
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.only(
@@ -329,18 +371,18 @@ class SheetState extends State<Sheet> {
         ),
         const SizedBox(width: 8),
         CircleAvatar(
-          backgroundColor:  primaryColor,
+          backgroundColor: primaryColor,
           child: IconButton(
             icon: Icon(
               isEditing
                   ? Icons.update
                   : _isTyping || _isAttachement
-                      ? Icons.send
-                      : Icons.mic,
+                  ? Icons.send
+                  : Icons.mic,
               color: Colors.white,
             ),
             onPressed:
-                _isTyping || _isAttachement ? _sendMessage : _startRecording,
+            _isTyping || _isAttachement ? _sendMessage : _startRecording,
           ),
         ),
       ],

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 
 import '../../controllers/app_controller.dart';
+import '../admin/admin.dart';
 import '../bottom_bar/bottom_bar.dart';
 import '../explore/main_explore.dart';
 import '../home_page/home_page.dart';
@@ -35,7 +36,6 @@ class MainScreenState extends State<MainScreen> {
     if (widget.user == null) {
       _checkIfUserIsLoggedIn();
     } else {
-      print("got user from login or registation page");
       user = widget.user;
       isLoggedIn = true;
       saveUserInMemory();
@@ -47,9 +47,8 @@ class MainScreenState extends State<MainScreen> {
     isLoggedIn = await AuthService.isLoggedIn();
     final prefs = await SharedPreferences.getInstance();
     if (isLoggedIn == null) {
-      final data = jsonDecode(prefs.getString('user'.tr) ?? 'null'.tr);
+      final data = jsonDecode(prefs.getString('user') ?? 'null');
       if (data != null) {
-        print("user in local storage getting it ...");
         user = UserModel.fromMap(data);
         saveUserInMemory();
         if (mounted) {
@@ -77,20 +76,16 @@ class MainScreenState extends State<MainScreen> {
     if (!isLoggedIn!) {
       print("Not logged in");
       if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/login'.tr, (route) => false);
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       }
     } else {
-      print("Logged in getting user from database");
       user = await AuthService.getUser();
-      prefs.setString('user'.tr, jsonEncode(user!.toMap()));
+      prefs.setString('user', jsonEncode(user!.toMap()));
       saveUserInMemory();
-      print("Saved user in local storage");
       if (mounted) {
         setState(() {});
       }
     }
-    String device = await getDeviceName();
-    print(device);
   }
 
   void saveUserInMemory() {
@@ -106,14 +101,16 @@ class MainScreenState extends State<MainScreen> {
         controller: _pageController,
         physics: NeverScrollableScrollPhysics(),
         children: [
-          HomePage(parentKey: widget.key),
-          ExploreScreen(isLoggedIn: isLoggedIn, parentKey: widget.key),
-          SettingsPage(isLoggedIn: isLoggedIn, parentKey: widget.key),
+          HomePage(parentKey: widget.key,user:user),
+          ExploreScreen(key:UniqueKey(),isLoggedIn: isLoggedIn,user:user),
+          SettingsPage(isLoggedIn: isLoggedIn, user: user),
+          AdminPage(),
         ],
       ),
       bottomNavigationBar: BottomNavBar(
         pageIndex: currentPage,
         pageController: _pageController,
+        user:user,
       ),
     );
   }

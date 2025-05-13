@@ -2,11 +2,15 @@ import 'dart:convert';
 
 import 'package:ahmini/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../models/freelancer.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../services/constants.dart';
+import 'freelancer_card.dart';
+import 'progress_indicator.dart';
 
 class FreeLancerList extends StatefulWidget {
   const FreeLancerList({super.key});
@@ -16,153 +20,118 @@ class FreeLancerList extends StatefulWidget {
 }
 
 class FreelancerListState extends State<FreeLancerList> {
+  final ScrollController _scrollController = ScrollController();
   List<FreelancerModel?> freelancers = [];
-  int lastFilter = 0;
+  String currentSearch = "";
+  int currentFilter = 0;
+  bool fetching = false;
+  bool isLoading = true;
+  bool limitReached = false;
 
   @override
   void initState() {
     super.initState();
     fetchFreeLancers();
+    _scrollController.addListener(() async {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 100 &&
+          !fetching &&
+          !limitReached) {
+        fetching = true;
+        await fetchFreeLancers(
+            pagination: freelancers.last!.id, clearOldList: false);
+        fetching = false;
+      }
+    });
   }
 
-  void fetchFreeLancers({filter = 0}) async {
+  Future<void> fetchFreeLancers(
+      {filter, search, pagination, bool clearOldList = true}) async {
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
     try {
-      lastFilter = filter;
-      freelancers = [];
-      final response = await http
-          .get(Uri.parse('$httpURL/api/portfolio/freelancers/?filter=$filter'));
+      if (filter == null) {
+        filter = currentFilter;
+      } else {
+        currentFilter = filter;
+      }
+      if (search == null) {
+        search = currentSearch;
+      } else {
+        currentSearch = search;
+      }
+      if (clearOldList) {
+        freelancers = [];
+      }
+      final prefs = await SharedPreferences.getInstance();
+      final sessionCookie = prefs.getString('session_cookie');
+      final response = await http.get(
+        Uri.parse('$httpURL/api/portfolio/freelancers/')
+            .replace(queryParameters: {
+          if (filter != null) "filter": filter.toString(),
+          if (pagination != null) "pagination": pagination.toString(),
+          if (search != null) "search": search.toString(),
+        }),
+        headers: {
+          'Cookie': "sessionid=$sessionCookie",
+        },
+      );
       print(response.body);
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body)['portfolios'];
+        if (jsonResponse.isEmpty) {
+          limitReached = true;
+        }
         for (var item in jsonResponse) {
           final freelancer = FreelancerModel.fromMap(item);
           freelancers.add(freelancer);
         }
-        print(freelancers);
-        setState(() {});
       }
     } catch (e) {
       print('exception lors de la recuperation des freelancers: $e');
-    } finally {}
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async {
-        fetchFreeLancers(filter: lastFilter);
+        limitReached = false;
+        fetchFreeLancers(filter: currentFilter, search: currentSearch);
       },
-      child: ListView.builder(
-        padding: EdgeInsets.all(15),
-        itemCount: freelancers.length,
-        itemBuilder: (context, index) {
-          return Container(
-            margin: EdgeInsets.only(bottom: 15),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
+      child: Stack(
+        children: [
+          ListView.builder(
+            controller: _scrollController,
+            physics: AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.all(15),
+            itemCount: freelancers.length,
+            itemBuilder: (context, index) {
+              return FreelancerCard(
+                freelancer: freelancers[index]!,
+                backgroundColor: backgroundColor,
+                primaryColor: primaryColor,
+                secondaryColor: secondaryColor,
+              );
+            },
+          ),
+          if (fetching || isLoading)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: MovingLineIndicator(),
             ),
-            child: ListTile(
-              contentPadding: EdgeInsets.all(15),
-              leading: CircleAvatar(
-                radius: 30,
-                backgroundColor: secondaryColor,
-                child: Icon(
-                  Icons.person,
-                  color: primaryColor,
-                ),
-              ),
-              title: Text(
-                // 'Freelancer ${index + 1}',
-                freelancers[index]!.name,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 5),
-                  Text(freelancers[index]!.technologies.isNotEmpty
-                      ? freelancers[index]!.technologies.first.name
-                      : ""),
-                  SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.star,
-                        size: 16,
-                        color: Colors.amber,
-                      ),
-                      Text(' 4.8 (156 avis)'),
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Wrap(
-                    spacing: 5,
-                    children: [
-                      Chip(
-                        // label: Text(tools[index]!.name),
-                        label: Text(freelancers[index]!.tools.isNotEmpty
-                            ? freelancers[index]!.tools.first.name
-                            : ""),
-                        backgroundColor: secondaryColor,
-                        labelStyle: TextStyle(
-                          color: primaryColor,
-                        ),
-                      ),
-                      if (freelancers[index]!.tools.length > 1)
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/portefolio',
-                                arguments: {
-                                  'portfolioID': freelancers[index]!.id
-                                });
-                          },
-                          child: Chip(
-                            label: Text("..."),
-                            backgroundColor: secondaryColor,
-                            labelStyle: TextStyle(
-                              color: primaryColor,
-                            ),
-                          ),
-                        ),
-
-                      // Chip(
-                      //   label: Text('Node.js'),
-                      //   backgroundColor: secondaryColor,
-                      // ),
-                    ],
-                  ),
-                ],
-              ),
-              trailing: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/portefolio',
-                      arguments: {'portfolioID': freelancers[index]!.id});
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: Text(
-                  'Voir plus',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          );
-        },
+        ],
       ),
     );
   }

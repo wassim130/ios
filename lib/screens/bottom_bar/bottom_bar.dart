@@ -2,14 +2,17 @@ import 'package:ahmini/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/theme_controller.dart';
+import '../../models/user.dart';
 
 class BottomNavBar extends StatefulWidget {
   final int pageIndex;
   final PageController pageController;
+  final UserModel? user;
   const BottomNavBar({
     super.key,
     required this.pageIndex,
     required this.pageController,
+    required this.user,
   });
 
   @override
@@ -26,8 +29,23 @@ class _BottomNavBarState extends State<BottomNavBar> {
     pageIndex = widget.pageIndex;
   }
 
+  void _handlePress(int index) {
+    if (pageIndex == index) return;
+    if (widget.user == null || widget.user!.isNew) {
+      return;
+    }
+    widget.pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+    pageIndex = index;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("rebuilt");
     return Obx(() {
       final isDark = themeController.isDarkMode.value;
       final primaryColorTheme = isDark ? darkPrimaryColor : primaryColor;
@@ -49,33 +67,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           unselectedItemColor: isDark ? Colors.grey[400] : Colors.grey,
           currentIndex: pageIndex,
           onTap: (index) {
-            if (pageIndex == index) return;
-            if (index == 0) {
-              widget.pageController.animateToPage(
-                widget.pageController.initialPage,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            }else if (index == 2){
-              widget.pageController.animateToPage(
-                widget.pageController.initialPage + 2,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            }
-            else if (pageIndex < index) {
-              widget.pageController.nextPage(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            } else if (pageIndex > index) {
-              widget.pageController.previousPage(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            }
-            pageIndex = index;
-            setState(() {});
+            _handlePress(index);
           },
           items: [
             BottomNavigationBarItem(
@@ -83,17 +75,25 @@ class _BottomNavBarState extends State<BottomNavBar> {
               label: 'Accueil'.tr,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.explore),
+              icon: Icon(widget.user == null || widget.user!.isNew
+                  ? Icons.lock
+                  : Icons.explore),
               label: 'Explorer'.tr,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
+              icon: Icon(widget.user == null || widget.user!.isNew
+                  ? Icons.lock
+                  : Icons.person),
               label: 'Compte'.tr,
             ),
+            if (widget.user?.isSuperUser ?? false)
+              BottomNavigationBarItem(
+                icon: Icon(Icons.admin_panel_settings),
+                label: 'Admin'.tr,
+              ),
           ],
         ),
       );
     });
   }
 }
-

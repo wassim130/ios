@@ -1,5 +1,11 @@
+import 'dart:typed_data';
+
+import 'package:ahmini/dictionary/entreprise_icons.dart';
 import 'package:ahmini/helper/CustomDialog/custom_dialog.dart';
+import 'package:ahmini/screens/entreprise/components/icons_drop_down.dart';
+import 'package:ahmini/services/constants.dart';
 import 'package:ahmini/theme.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
@@ -9,11 +15,12 @@ import '../../controllers/theme_controller.dart';
 import '../../models/company.dart';
 import '../../models/job.dart';
 import '../../helper/CustomDialog/loading_indicator.dart';
-import 'components/drop_down.dart';
+// Ajouter l'import pour la page de détail de l'offre d'emploi
+import 'job_detail.dart';
 
 class EnterprisePage extends StatefulWidget {
   final int companyID;
-  const EnterprisePage({super.key, required this.companyID});
+  const EnterprisePage({super.key, this.companyID = 0});
 
   @override
   State<EnterprisePage> createState() => _EnterprisePageState();
@@ -22,10 +29,20 @@ class EnterprisePage extends StatefulWidget {
 class _EnterprisePageState extends State<EnterprisePage> {
   CompanyModel? company;
   CompanyModel? oldCompany;
+
+  Uint8List? imageBytes;
+  String? imageName;
+
   bool isEditing = false;
   bool isLoading = false;
+
+  List<int> removedJobs = [];
+  List<int> removedInnovations = [];
+
   final ImagePicker _picker = ImagePicker();
   final ThemeController themeController = Get.find<ThemeController>();
+
+  TextEditingController _reviewTextFieldController = TextEditingController();
 
   @override
   void initState() {
@@ -103,17 +120,35 @@ class _EnterprisePageState extends State<EnterprisePage> {
 
   // Méthode pour basculer le mode édition
   void _toggleEditMode({t = false}) async {
+    myCustomLoadingIndicator(context);
     if (!isEditing) {
       print("Start Editing");
       oldCompany = company!.copy();
     } else if (isEditing && t) {
       if (company != null) {
-        final s = await CompanyModel.update(company!);
-        myCustomDialog(context, s);
+        final s = await CompanyModel.update(
+          company!,
+          removedJobs,
+          removedInnovations,
+          imageBytes,
+          imageName,
+        );
+        company!.logoPath = s['logo_path'];
+        imageBytes = null;
+        imageName = null;
+        if (mounted) {
+          Navigator.pop(context);
+          myCustomDialog(context, s);
+        }
       }
     } else {
       print("Pressed the X button");
+      imageBytes = null;
+      imageName = null;
       company = oldCompany;
+    }
+    if (mounted) {
+      Navigator.pop(context);
     }
     isEditing = !isEditing;
     setState(() {});
@@ -168,21 +203,6 @@ class _EnterprisePageState extends State<EnterprisePage> {
                 ),
                 maxLines: 3,
               ),
-              SizedBox(height: 10),
-              TextField(
-                controller: TextEditingController(text: imageUrl),
-                decoration: InputDecoration(
-                  labelText: 'URL de l\'image',
-                  border: OutlineInputBorder(),
-                  labelStyle: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
-                ),
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-                onChanged: (value) => imageUrl = value,
-              ),
             ],
           ),
         ),
@@ -211,6 +231,98 @@ class _EnterprisePageState extends State<EnterprisePage> {
                       link: "",
                     ),
                   );
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: Text(
+              'Ajouter',
+              style: TextStyle(
+                color: isDark ? darkPrimaryColor : primaryColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Méthode pour ajouter une innovation d'emploi existante
+  void _addNewInnovation() {
+    final TextEditingController titleController = TextEditingController();
+    final TextEditingController descriptionController = TextEditingController();
+    final isDark = themeController.isDarkMode.value;
+    IconData? selectedIcon = icons['home'];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? darkBackgroundColor : backgroundColor,
+        title: Text(
+          'Ajouter une offre d\'emploi',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black,
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(
+                  labelText: 'Titre',
+                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+                maxLines: 3,
+              ),
+              SizedBox(height: 10),
+              IconsDropDown(callBack: (icon) {
+                selectedIcon = icon;
+              })
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Annuler',
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              if (titleController.text.isNotEmpty &&
+                  descriptionController.text.isNotEmpty) {
+                setState(() {
+                  company!.innovationAreas.add(InnovationsModel(
+                      id: 0,
+                      title: titleController.text,
+                      description: descriptionController.text,
+                      icon: selectedIcon!));
                 });
                 Navigator.pop(context);
               }
@@ -280,21 +392,6 @@ class _EnterprisePageState extends State<EnterprisePage> {
                 maxLines: 3,
               ),
               SizedBox(height: 10),
-              TextField(
-                controller: TextEditingController(text: imageUrl),
-                decoration: InputDecoration(
-                  labelText: 'URL de l\'image',
-                  border: OutlineInputBorder(),
-                  labelStyle: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
-                ),
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-                onChanged: (value) => imageUrl = value,
-              ),
-              SelectDropdown(),
             ],
           ),
         ),
@@ -317,6 +414,104 @@ class _EnterprisePageState extends State<EnterprisePage> {
                   company!.productsList[index].description =
                       descriptionController.text;
                   company!.productsList[index].image = imageUrl;
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: Text(
+              'Enregistrer',
+              style: TextStyle(
+                color: isDark ? darkPrimaryColor : primaryColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Méthode pour modifier une offre d'emploi existante
+  void _editInnovation(int index) {
+    final InnovationsModel innovation = company!.innovationAreas[index];
+    final TextEditingController titleController =
+    TextEditingController(text: innovation.title);
+    final TextEditingController descriptionController =
+    TextEditingController(text: innovation.description);
+    IconData? selectedIcon = innovation.icon;
+
+    final isDark = themeController.isDarkMode.value;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? darkBackgroundColor : backgroundColor,
+        title: Text(
+          'Modifier l\'offre d\'emploi',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black,
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(
+                  labelText: 'Titre',
+                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+                maxLines: 3,
+              ),
+              SizedBox(height: 10),
+              IconsDropDown(
+                  icon: selectedIcon,
+                  callBack: (icon) {
+                    selectedIcon = icon;
+                  })
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Annuler',
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              if (titleController.text.isNotEmpty &&
+                  descriptionController.text.isNotEmpty) {
+                setState(() {
+                  company!.innovationAreas[index].title = titleController.text;
+                  company!.innovationAreas[index].description =
+                      descriptionController.text;
+                  company!.innovationAreas[index].icon =
+                      selectedIcon ?? Icons.device_unknown;
                 });
                 Navigator.pop(context);
               }
@@ -365,6 +560,7 @@ class _EnterprisePageState extends State<EnterprisePage> {
           ),
           TextButton(
             onPressed: () {
+              removedJobs.add(company!.productsList[index].id);
               setState(() {
                 company!.productsList.removeAt(index);
               });
@@ -382,17 +578,63 @@ class _EnterprisePageState extends State<EnterprisePage> {
     );
   }
 
+  // Méthode pour supprimer une offre d'emploi
+  void _deleteInnovation(int index) {
+    final isDark = themeController.isDarkMode.value;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? darkBackgroundColor : backgroundColor,
+        title: Text(
+          'Supprimer l\'offre',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black,
+          ),
+        ),
+        content: Text(
+          'Êtes-vous sûr de vouloir supprimer cette offre d\'emploi ?',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Annuler',
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              removedInnovations.add(company!.innovationAreas[index].id);
+              setState(() {
+                company!.innovationAreas.removeAt(index);
+              });
+              Navigator.pop(context);
+            },
+            child: Text(
+              'Supprimer',
+              style: TextStyle(
+                color: Colors.red,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Méthode pour changer la photo de profil
   Future<void> _changeProfilePhoto() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      setState(() {
-        // Dans une application réelle, vous devriez stocker l'image et mettre à jour le chemin
-        // Pour cet exemple, nous simulons juste le changement
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Photo de profil mise à jour')),
-        );
-      });
+      imageName = image.name;
+      imageBytes = await image.readAsBytes();
+      setState(() {});
     }
   }
 
@@ -405,13 +647,18 @@ class _EnterprisePageState extends State<EnterprisePage> {
     }
   }
 
+  void _handleUploadPicture() async {}
+
+  void _addReview() async {}
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final isDark = themeController.isDarkMode.value;
       final primaryColorTheme = isDark ? darkPrimaryColor : primaryColor;
       final secondaryColorTheme = isDark ? darkSecondaryColor : secondaryColor;
-      final backgroundColorTheme = isDark ? darkBackgroundColor : backgroundColor;
+      final backgroundColorTheme =
+      isDark ? darkBackgroundColor : backgroundColor;
 
       return Scaffold(
         backgroundColor: primaryColorTheme,
@@ -444,7 +691,8 @@ class _EnterprisePageState extends State<EnterprisePage> {
                             Navigator.pop(context);
                           },
                           style: TextButton.styleFrom(
-                            foregroundColor: isDark ? Colors.white : Colors.black,
+                            foregroundColor:
+                            isDark ? Colors.white : Colors.black,
                           ),
                           child: Text('Keep editing'),
                         ),
@@ -573,7 +821,6 @@ class _EnterprisePageState extends State<EnterprisePage> {
             ),
           ],
         ),
-
         body: isLoading
             ? Center(child: CircularProgressIndicator())
             : company == null
@@ -621,14 +868,40 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                       color: Colors.white, width: 3),
                                   color: Colors.white,
                                 ),
-                                child: Center(
-                                  child: Text(
-                                    "IS",
-                                    style: TextStyle(
-                                      color: primaryColorTheme,
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.bold,
+                                child: ClipOval(
+                                  child: imageBytes == null
+                                      ? company?.logoPath
+                                      .isNotEmpty ??
+                                      false
+                                      ? CachedNetworkImage(
+                                    imageUrl:
+                                    "$httpURL${company?.logoPath}",
+                                    fit: BoxFit
+                                        .cover, // Ensures image fills the container
+                                    width: 120,
+                                    height: 120,
+                                  )
+                                      : Center(
+                                    child: Text(
+                                      company?.companyName
+                                          .substring(
+                                          0, 2) ??
+                                          "",
+                                      style: TextStyle(
+                                        color:
+                                        primaryColorTheme,
+                                        fontSize: 48,
+                                        fontWeight:
+                                        FontWeight.bold,
+                                      ),
                                     ),
+                                  )
+                                      : Image.memory(
+                                    imageBytes!,
+                                    width: 120,
+                                    height: 120,
+                                    fit: BoxFit
+                                        .cover, // Ensures image fills the container
                                   ),
                                 ),
                               ),
@@ -690,8 +963,8 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                 ? () => _showEditDialog(
                                 'Slogan',
                                 company!.tagline,
-                                    (value) => setState(
-                                        () => company!.tagline = value))
+                                    (value) => setState(() =>
+                                company!.tagline = value))
                                 : null,
                             child: Row(
                               mainAxisAlignment:
@@ -714,23 +987,21 @@ class _EnterprisePageState extends State<EnterprisePage> {
                           ),
                           SizedBox(height: 15),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment:
+                            MainAxisAlignment.center,
                             children: [
-                              _buildEditableStatCard(
-                                  'Solutions',
-                                  company!.solutionsCount,
-                                      (value) => setState(() =>
-                                  company!.solutionsCount = value)),
-                              _buildEditableStatCard(
-                                  'Clients',
-                                  company!.clientsCount,
-                                      (value) => setState(() =>
-                                  company!.clientsCount = value)),
-                              _buildEditableStatCard(
-                                  'Satisfaction',
-                                  company!.satisfactionRate,
-                                      (value) => setState(() => company!
-                                      .satisfactionRate = value)),
+                              _buildStatCard(
+                                'Solutions',
+                                company!.solutionsCount,
+                              ),
+                              _buildStatCard(
+                                'Clients',
+                                company!.clientsCount,
+                              ),
+                              _buildStatCard(
+                                'Satisfaction',
+                                company!.satisfactionRate,
+                              ),
                             ],
                           ),
                         ],
@@ -779,13 +1050,27 @@ class _EnterprisePageState extends State<EnterprisePage> {
                       ),
 
                       // Innovation Areas
-                      Text(
-                        'Domaines d\'Innovation',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
+                      Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Domaines d\'Innovation',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: isDark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                          ),
+                          if (isEditing)
+                            IconButton(
+                              icon: Icon(Icons.add_circle,
+                                  color: primaryColorTheme),
+                              onPressed: _addNewInnovation,
+                            ),
+                        ],
                       ),
                       SizedBox(height: 15),
                       GridView.builder(
@@ -800,7 +1085,8 @@ class _EnterprisePageState extends State<EnterprisePage> {
                         ),
                         itemCount: company!.innovationAreas.length,
                         itemBuilder: (context, index) {
-                          final area = company!.innovationAreas[index];
+                          final area =
+                          company!.innovationAreas[index];
                           return _buildInnovationCard(
                             title: area.title,
                             icon: area.icon,
@@ -808,6 +1094,7 @@ class _EnterprisePageState extends State<EnterprisePage> {
                             secondaryColorTheme: secondaryColorTheme,
                             primaryColorTheme: primaryColorTheme,
                             isDark: isDark,
+                            index: index,
                           );
                         },
                       ),
@@ -824,7 +1111,9 @@ class _EnterprisePageState extends State<EnterprisePage> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : Colors.black,
+                              color: isDark
+                                  ? Colors.white
+                                  : Colors.black,
                             ),
                           ),
                           Row(
@@ -858,7 +1147,8 @@ class _EnterprisePageState extends State<EnterprisePage> {
                         (company!.productsList.length / 2).ceil(),
                         itemBuilder: (context, rowIndex) {
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 15),
+                            padding:
+                            const EdgeInsets.only(bottom: 15),
                             child: Row(
                               children: [
                                 // Premier élément de la ligne
@@ -868,7 +1158,7 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                       ? _buildProductCard(
                                     company!.productsList[
                                     rowIndex * 2]
-                                        .toMap(),
+                                    ,
                                     rowIndex * 2,
                                     secondaryColorTheme,
                                     primaryColorTheme,
@@ -880,11 +1170,12 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                 // Deuxième élément de la ligne (s'il existe)
                                 Expanded(
                                   child: (rowIndex * 2 + 1 <
-                                      company!.productsList.length)
+                                      company!
+                                          .productsList.length)
                                       ? _buildProductCard(
                                     company!.productsList[
                                     rowIndex * 2 + 1]
-                                        .toMap(),
+                                    ,
                                     rowIndex * 2 + 1,
                                     secondaryColorTheme,
                                     primaryColorTheme,
@@ -901,6 +1192,7 @@ class _EnterprisePageState extends State<EnterprisePage> {
                       SizedBox(height: 25),
 
                       // Testimonials Section
+
                       Text(
                         'Ce que disent nos clients',
                         style: TextStyle(
@@ -909,6 +1201,7 @@ class _EnterprisePageState extends State<EnterprisePage> {
                           color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
+
                       SizedBox(height: 15),
                       SizedBox(
                         height: 200,
@@ -927,6 +1220,30 @@ class _EnterprisePageState extends State<EnterprisePage> {
                           },
                         ),
                       ),
+                      // SizedBox(height: 15),
+                      // Container(
+                      //   height: 50,
+                      //   decoration: BoxDecoration(
+                      //     color: Theme.of(context)
+                      //         .colorScheme
+                      //         .secondary.withValues(alpha:0.2),
+                      //     //circle border
+                      //     border: Border.all(width: 2),
+                      //     borderRadius: BorderRadius.circular(20)
+
+                      //   ),
+                      //   child: TextField(
+                      //     controller: _reviewTextFieldController,
+                      //     decoration: InputDecoration(
+                      //       border: InputBorder.none,
+                      //       suffixIcon: IconButton(
+                      //         onPressed: () {},
+                      //         icon: Icon(Icons.close),
+                      //       ),
+                      //       hintText: 'Votre review...',
+                      //     ),
+                      //   ),
+                      // ),
 
                       SizedBox(height: 25),
 
@@ -950,24 +1267,30 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: isDark ? Colors.white : Colors.black,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black,
                                     ),
                                   ),
                                   if (isEditing) SizedBox(width: 10),
                                   if (isEditing)
                                     IconButton(
-                                      icon: Icon(Icons.edit, size: 18),
+                                      icon:
+                                      Icon(Icons.edit, size: 18),
                                       onPressed: () {
                                         // Dialogue pour éditer toutes les informations de contact
                                         showDialog(
                                           context: context,
                                           builder: (context) =>
                                               AlertDialog(
-                                                backgroundColor: backgroundColorTheme,
+                                                backgroundColor:
+                                                backgroundColorTheme,
                                                 title: Text(
                                                   'Modifier les informations de contact',
                                                   style: TextStyle(
-                                                    color: isDark ? Colors.white : Colors.black,
+                                                    color: isDark
+                                                        ? Colors.white
+                                                        : Colors.black,
                                                   ),
                                                 ),
                                                 content:
@@ -977,8 +1300,7 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                                     MainAxisSize.min,
                                                     children: [
                                                       TextField(
-                                                        controller:
-                                                        TextEditingController(
+                                                        controller: TextEditingController(
                                                             text: company!
                                                                 .companyAddress),
                                                         decoration:
@@ -987,21 +1309,30 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                                           'Adresse',
                                                           border:
                                                           OutlineInputBorder(),
-                                                          labelStyle: TextStyle(
-                                                            color: isDark ? Colors.white70 : Colors.black54,
+                                                          labelStyle:
+                                                          TextStyle(
+                                                            color: isDark
+                                                                ? Colors
+                                                                .white70
+                                                                : Colors
+                                                                .black54,
                                                           ),
                                                         ),
                                                         style: TextStyle(
-                                                          color: isDark ? Colors.white : Colors.black,
+                                                          color: isDark
+                                                              ? Colors
+                                                              .white
+                                                              : Colors
+                                                              .black,
                                                         ),
                                                         onChanged: (value) =>
                                                         company!.companyAddress =
                                                             value,
                                                       ),
-                                                      SizedBox(height: 10),
+                                                      SizedBox(
+                                                          height: 10),
                                                       TextField(
-                                                        controller:
-                                                        TextEditingController(
+                                                        controller: TextEditingController(
                                                             text: company!
                                                                 .companyWebsite),
                                                         decoration:
@@ -1010,21 +1341,30 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                                           'Site web',
                                                           border:
                                                           OutlineInputBorder(),
-                                                          labelStyle: TextStyle(
-                                                            color: isDark ? Colors.white70 : Colors.black54,
+                                                          labelStyle:
+                                                          TextStyle(
+                                                            color: isDark
+                                                                ? Colors
+                                                                .white70
+                                                                : Colors
+                                                                .black54,
                                                           ),
                                                         ),
                                                         style: TextStyle(
-                                                          color: isDark ? Colors.white : Colors.black,
+                                                          color: isDark
+                                                              ? Colors
+                                                              .white
+                                                              : Colors
+                                                              .black,
                                                         ),
                                                         onChanged: (value) =>
                                                         company!.companyWebsite =
                                                             value,
                                                       ),
-                                                      SizedBox(height: 10),
+                                                      SizedBox(
+                                                          height: 10),
                                                       TextField(
-                                                        controller:
-                                                        TextEditingController(
+                                                        controller: TextEditingController(
                                                             text: company!
                                                                 .companyEmail),
                                                         decoration:
@@ -1033,21 +1373,30 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                                           'Email',
                                                           border:
                                                           OutlineInputBorder(),
-                                                          labelStyle: TextStyle(
-                                                            color: isDark ? Colors.white70 : Colors.black54,
+                                                          labelStyle:
+                                                          TextStyle(
+                                                            color: isDark
+                                                                ? Colors
+                                                                .white70
+                                                                : Colors
+                                                                .black54,
                                                           ),
                                                         ),
                                                         style: TextStyle(
-                                                          color: isDark ? Colors.white : Colors.black,
+                                                          color: isDark
+                                                              ? Colors
+                                                              .white
+                                                              : Colors
+                                                              .black,
                                                         ),
                                                         onChanged: (value) =>
                                                         company!.companyEmail =
                                                             value,
                                                       ),
-                                                      SizedBox(height: 10),
+                                                      SizedBox(
+                                                          height: 10),
                                                       TextField(
-                                                        controller:
-                                                        TextEditingController(
+                                                        controller: TextEditingController(
                                                             text: company!
                                                                 .companyPhone),
                                                         decoration:
@@ -1056,12 +1405,21 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                                           'Téléphone',
                                                           border:
                                                           OutlineInputBorder(),
-                                                          labelStyle: TextStyle(
-                                                            color: isDark ? Colors.white70 : Colors.black54,
+                                                          labelStyle:
+                                                          TextStyle(
+                                                            color: isDark
+                                                                ? Colors
+                                                                .white70
+                                                                : Colors
+                                                                .black54,
                                                           ),
                                                         ),
                                                         style: TextStyle(
-                                                          color: isDark ? Colors.white : Colors.black,
+                                                          color: isDark
+                                                              ? Colors
+                                                              .white
+                                                              : Colors
+                                                              .black,
                                                         ),
                                                         onChanged: (value) =>
                                                         company!.companyPhone =
@@ -1078,7 +1436,11 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                                     child: Text(
                                                       'Annuler',
                                                       style: TextStyle(
-                                                        color: isDark ? Colors.white70 : Colors.black54,
+                                                        color: isDark
+                                                            ? Colors
+                                                            .white70
+                                                            : Colors
+                                                            .black54,
                                                       ),
                                                     ),
                                                   ),
@@ -1091,7 +1453,8 @@ class _EnterprisePageState extends State<EnterprisePage> {
                                                     child: Text(
                                                       'Enregistrer',
                                                       style: TextStyle(
-                                                        color: primaryColorTheme,
+                                                        color:
+                                                        primaryColorTheme,
                                                       ),
                                                     ),
                                                   ),
@@ -1146,45 +1509,39 @@ class _EnterprisePageState extends State<EnterprisePage> {
     });
   }
 
-  Widget _buildEditableStatCard(
-      String label, String value, Function(String) onEdit) {
+  Widget _buildStatCard(String label, String value) {
     final isDark = themeController.isDarkMode.value;
 
-    return GestureDetector(
-      onTap: isEditing ? () => _showEditDialog(label, value, onEdit) : null,
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 10),
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 10),
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                if (isEditing) SizedBox(width: 5),
-                if (isEditing) Icon(Icons.edit, color: Colors.white, size: 14),
-              ],
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
               ),
+            ],
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1234,7 +1591,8 @@ class _EnterprisePageState extends State<EnterprisePage> {
     );
   }
 
-  Widget _buildContactRow(IconData icon, String text, Color secondaryColorTheme, bool isDark) {
+  Widget _buildContactRow(
+      IconData icon, String text, Color secondaryColorTheme, bool isDark) {
     return Row(
       children: [
         Container(
@@ -1260,7 +1618,7 @@ class _EnterprisePageState extends State<EnterprisePage> {
   }
 
   Widget _buildProductCard(
-      Map<String, dynamic> product,
+      Product product,  // Changé de Map<String, dynamic> à Product
       int index,
       Color secondaryColorTheme,
       Color primaryColorTheme,
@@ -1268,10 +1626,13 @@ class _EnterprisePageState extends State<EnterprisePage> {
       ) {
     return InkWell(
       onTap: () async {
-        if (product['link'].isNotEmpty) {
-          final Uri url = Uri.parse(product['link']);
-          await launchUrl(url);
-        }
+        Get.to(
+              () => JobDetailPage(
+            job: product,
+            companyID: company!.id,
+          ),
+          transition: Transition.rightToLeft,
+        );
       },
       child: Stack(
         children: [
@@ -1287,7 +1648,7 @@ class _EnterprisePageState extends State<EnterprisePage> {
                 ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
                   child: Image.network(
-                    product['image'],
+                    product.image,  // Changé de product['image'] à product.image
                     height: 120,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -1313,7 +1674,7 @@ class _EnterprisePageState extends State<EnterprisePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        product['title'],
+                        product.title,  // Changé de product['title'] à product.title
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -1322,7 +1683,7 @@ class _EnterprisePageState extends State<EnterprisePage> {
                       ),
                       SizedBox(height: 5),
                       Text(
-                        product['description'],
+                        product.description,  // Changé de product['description'] à product.description
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -1333,17 +1694,24 @@ class _EnterprisePageState extends State<EnterprisePage> {
                       SizedBox(height: 8),
                       GestureDetector(
                         onTap: () {
-                          _handleContactTap(product['id']);
+                          Navigator.pushNamed(
+                            context,
+                            '/job-detail',
+                            arguments: {
+                              'job': product,
+                              'companyID': company!.id,
+                            },
+                          );
                         },
                         child: Chip(
                           label: Text(
-                            "Postuler",
+                            "Voir plus",  // Changé de "Postuler" à "Voir plus"
                             style: TextStyle(fontSize: 15, color: Colors.white),
                           ),
                           backgroundColor: primaryColor,
                           padding: EdgeInsets.zero,
                           materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
+                          MaterialTapTargetSize.shrinkWrap,
                           visualDensity: VisualDensity.compact,
                         ),
                       )
@@ -1365,7 +1733,8 @@ class _EnterprisePageState extends State<EnterprisePage> {
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.edit, size: 20, color: primaryColorTheme),
+                      icon:
+                      Icon(Icons.edit, size: 20, color: primaryColorTheme),
                       onPressed: () => _editJobOffer(index),
                     ),
                   ),
@@ -1395,45 +1764,90 @@ class _EnterprisePageState extends State<EnterprisePage> {
     required Color secondaryColorTheme,
     required Color primaryColorTheme,
     required bool isDark,
+    required int index,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: secondaryColorTheme,
         borderRadius: BorderRadius.circular(15),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 30,
-              color: primaryColorTheme,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 30,
+                  color: primaryColorTheme,
+                ),
+                SizedBox(height: 8),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  description,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            SizedBox(height: 8),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black,
+          ),
+          if (isEditing)
+            Positioned(
+              top: 5,
+              right: 5,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 35,
+                    height: 35,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.edit,
+                            size: 15, color: primaryColorTheme),
+                        onPressed: () => _editInnovation(index),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 5),
+                  SizedBox(
+                    width: 35,
+                    height: 35,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.delete, size: 15, color: Colors.red),
+                        onPressed: () => _deleteInnovation(index),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 4),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 11,
-                color: isDark ? Colors.white70 : Colors.black87,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -1530,4 +1944,3 @@ class _EnterprisePageState extends State<EnterprisePage> {
     );
   }
 }
-

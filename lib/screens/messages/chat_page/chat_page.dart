@@ -1,4 +1,3 @@
-// chat_page.dart
 import 'package:ahmini/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -61,6 +60,13 @@ class ChatPageState extends State<ChatPage> {
     super.dispose();
   }
 
+  void _handleRecordingComplete(String audioPath, int duration) {
+    // Process the recorded audio
+    sheetKey.currentState?.setState(() {
+      sheetKey.currentState!.processAudioRecording(audioPath, duration);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -104,15 +110,16 @@ class ChatPageState extends State<ChatPage> {
                     conversationID: widget.conversationID,
                     messageController: _messageController,
                     onRecordingStateChanged: (bool recording) {
-                      recordingOverlayKey.currentState?.setState(() {
-                        recordingOverlayKey.currentState!.isRecording = recording;
-                      });
+                      if (recording) {
+                        recordingOverlayKey.currentState?.startRecording();
+                      }
                     },
                   ),
                 ],
               ),
               RecordingOverlay(
                 key: recordingOverlayKey,
+                onRecordingComplete: _handleRecordingComplete,
               ),
             ],
           ),
